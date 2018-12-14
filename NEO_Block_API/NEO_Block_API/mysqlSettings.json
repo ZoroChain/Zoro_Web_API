@@ -1,0 +1,12 @@
+{
+	//"database=mirror_distribution;server=106.15.200.244;user id=root;Password=jingmian@mysql;sslmode=None"
+	"mysql": {
+		"database": "block",
+		"server": "106.15.200.244",
+		"user id": "root",
+		"Password": "jingmian@mysql",
+		"sslmode": "None"
+	},
+	"startblock": 0,
+	"startNetType": "testnet"
+}
