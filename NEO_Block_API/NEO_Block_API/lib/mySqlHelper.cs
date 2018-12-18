@@ -94,7 +94,7 @@ namespace NEO_Block_API.lib
 
 
 
-				string select = "select a.addr, a.firstuse,a.lastuse, a.txcount, b.blockindex ,b.blocktime ,b.txid from address_0000000000000000000000000000000000000000 as a , address_tx_0000000000000000000000000000000000000000 as b where  a.firstuse = b.blockindex " ;//limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0]; // string select = "select a.addr, a.firstuse,a.lastuse, a.txcount, b.blockindex ,b.blocktime ,b.txid from address_0000000000000000000000000000000000000000 as a limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
+				string select = "select addr, firstuse, lastuse, txcount from address_0000000000000000000000000000000000000000 limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0]; // string select = "select a.addr, a.firstuse,a.lastuse, a.txcount, b.blockindex ,b.blocktime ,b.txid from address_0000000000000000000000000000000000000000 as a limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
 
 				JsonPRCresponse res = new JsonPRCresponse();
 				MySqlCommand cmd = new MySqlCommand(select, conn);
@@ -103,21 +103,12 @@ namespace NEO_Block_API.lib
 		
 				while (rdr.Read())
 				{
-					var adata = (rdr["addr"]).ToString();
-				
+					var adata = (rdr["addr"]).ToString();				
 					var f = (rdr["firstuse"]).ToString();
 					var lu = (rdr["lastuse"]).ToString();
-					var bi = (rdr["blockindex"]).ToString();
-					var bt = (rdr["blocktime"]).ToString();
-					var txid = (rdr["txid"]).ToString();
 					var txc = (rdr["txcount"]).ToString();
 
-					JObject dt = new JObject() {  { "$date", bt }  };
-					
-					
-					JObject j = new JObject() { { "txid", txid }, { "blockindex", bi }, { "blocktime", dt } };
-					JObject m = new JObject() { { "txid", txid }, { "blockindex", bi }, { "blocktime", dt } };
-					bk.Add(new JObject { { "addr", adata } , { "firstDate",f } , { "lastDate", lu }, { "firstuse", j} , { "lastuse", m }, { "txcount", txc } });
+					bk.Add(new JObject { { "addr", adata } , { "firstDate",f } , { "lastDate", lu }, { "txcount", txc } });
 			
 				}
 
@@ -138,7 +129,7 @@ namespace NEO_Block_API.lib
 
 
 
-                string select = "select a.addr, a.firstuse,a.lastuse, a.txcount, b.blockindex ,b.blocktime ,b.txid from address_"+req.@params[0]+ " as a , address_tx_" + req.@params[0] + " as b where  a.firstuse = b.blockindex ";//limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0]; // string select = "select a.addr, a.firstuse,a.lastuse, a.txcount, b.blockindex ,b.blocktime ,b.txid from address_0000000000000000000000000000000000000000 as a limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
+                string select = "select addr, firstuse, lastuse, txcount from address_" + req.@params[0]+ " limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + req.@params[1]; // string select = "select a.addr, a.firstuse,a.lastuse, a.txcount, b.blockindex ,b.blocktime ,b.txid from address_0000000000000000000000000000000000000000 as a limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
 
                 JsonPRCresponse res = new JsonPRCresponse();
                 MySqlCommand cmd = new MySqlCommand(select, conn);
@@ -148,20 +139,11 @@ namespace NEO_Block_API.lib
                 while (rdr.Read())
                 {
                     var adata = (rdr["addr"]).ToString();
-
                     var f = (rdr["firstuse"]).ToString();
                     var lu = (rdr["lastuse"]).ToString();
-                    var bi = (rdr["blockindex"]).ToString();
-                    var bt = (rdr["blocktime"]).ToString();
-                    var txid = (rdr["txid"]).ToString();
                     var txc = (rdr["txcount"]).ToString();
 
-                    JObject dt = new JObject() { { "$date", bt } };
-
-
-                    JObject j = new JObject() { { "txid", txid }, { "blockindex", bi }, { "blocktime", dt } };
-                    JObject m = new JObject() { { "txid", txid }, { "blockindex", bi }, { "blocktime", dt } };
-                    bk.Add(new JObject { { "addr", adata }, { "firstDate", f }, { "lastDate", lu }, { "firstuse", j }, { "lastuse", m }, { "txcount", txc } });
+                    bk.Add(new JObject { { "addr", adata }, { "firstDate", f }, { "lastDate", lu }, { "txcount", txc } });
 
                 }
 
@@ -180,7 +162,7 @@ namespace NEO_Block_API.lib
 				conn.Open();
 
 
-				string select = "select a.addr, a.firstuse, a.lastuse, a.txcount, b.blockindex ,b.blocktime ,b.txid from address_0000000000000000000000000000000000000000 as a , address_tx_0000000000000000000000000000000000000000 as b where a.addr='" + req.@params[0] + "'"; // + "' and a.firstuse = b.blockindex";
+				string select = "select addr, firstuse, lastuse, txcount from address_0000000000000000000000000000000000000000 where addr='" + req.@params[0] + "'"; // + "' and a.firstuse = b.blockindex";
 
 				JsonPRCresponse res = new JsonPRCresponse();
 				MySqlCommand cmd = new MySqlCommand(select, conn);
@@ -194,23 +176,15 @@ namespace NEO_Block_API.lib
 				while (rdr.Read())
 				{
 
-					var adata = (rdr["addr"]).ToString();
-					var fs = (rdr["firstuse"]).ToString();
-					var ls = (rdr["lastuse"]).ToString();
-					var f = (rdr["txcount"]).ToString();
-					var l = (rdr["blockindex"]).ToString();
-					var bt= (rdr["blocktime"]).ToString();
-					var txid = (rdr["txid"]).ToString();
+                    var adata = (rdr["addr"]).ToString();
+                    var f = (rdr["firstuse"]).ToString();
+                    var lu = (rdr["lastuse"]).ToString();
+                    var txc = (rdr["txcount"]).ToString();
 
-					JObject dt = new JObject() { { "$date", bt } };
+                    bk.Add(new JObject { { "addr", adata }, { "firstDate", f }, { "lastDate", lu }, { "txcount", txc } });
 
-					JObject j = new JObject() { { "txid", txid }, { "blockindex", l }, { "blocktime", dt } };
-					JObject m = new JObject() { { "txid", txid }, { "blockindex", l }, { "blocktime", dt } };
 
-					bk.Add(new JObject { { "addr", adata }, { "firstuse", j }, { "lastuse", m }, { "txcount", f }  });
-	
-
-				}
+                }
 
 				return res.result = bk;
 
@@ -224,7 +198,7 @@ namespace NEO_Block_API.lib
                 conn.Open();
 
 
-                string select = "select a.addr, a.firstuse, a.lastuse, a.txcount, b.blockindex ,b.blocktime ,b.txid from address_"+req.@params[0]+ " as a , address_tx_" + req.@params[0] + " as b where a.addr='" + req.@params[1] + "'"; // + "' and a.firstuse = b.blockindex";
+                string select = "select addr, firstuse, lastuse, txcount from address_" + req.@params[0]+ " where addr='" + req.@params[1] + "'"; // + "' and a.firstuse = b.blockindex";
 
                 JsonPRCresponse res = new JsonPRCresponse();
                 MySqlCommand cmd = new MySqlCommand(select, conn);
@@ -239,19 +213,11 @@ namespace NEO_Block_API.lib
                 {
 
                     var adata = (rdr["addr"]).ToString();
-                    var fs = (rdr["firstuse"]).ToString();
-                    var ls = (rdr["lastuse"]).ToString();
-                    var f = (rdr["txcount"]).ToString();
-                    var l = (rdr["blockindex"]).ToString();
-                    var bt = (rdr["blocktime"]).ToString();
-                    var txid = (rdr["txid"]).ToString();
+                    var f = (rdr["firstuse"]).ToString();
+                    var lu = (rdr["lastuse"]).ToString();
+                    var txc = (rdr["txcount"]).ToString();
 
-                    JObject dt = new JObject() { { "$date", bt } };
-
-                    JObject j = new JObject() { { "txid", txid }, { "blockindex", l }, { "blocktime", dt } };
-                    JObject m = new JObject() { { "txid", txid }, { "blockindex", l }, { "blocktime", dt } };
-
-                    bk.Add(new JObject { { "addr", adata }, { "firstuse", j }, { "lastuse", m }, { "txcount", f } });
+                    bk.Add(new JObject { { "addr", adata }, { "firstDate", f }, { "lastDate", lu }, { "txcount", txc } });
 
 
                 }
@@ -1475,7 +1441,7 @@ namespace NEO_Block_API.lib
 			{
 				conn.Open();
 
-				string select = "select txid ,size, type ,version, blockheight, sys_fee, net_fee, vin , vout from tx_0000000000000000000000000000000000000000 where txid = '" + req.@params[0] + "'";
+				string select = "select txid ,size, type ,version, blockheight, sys_fee, net_fee from tx_0000000000000000000000000000000000000000 where txid = '" + req.@params[0] + "'";
 
 				MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1500,7 +1466,7 @@ namespace NEO_Block_API.lib
 
 					
 
-					bk.Add(new JObject {{ "txid", tx } , { "size", sz } , { "type", tp } , { "version", vs } , { "blockindex", bh } , { "sys_fee", sf }, { "net_fee", nf }, { "vin", adata }, { "vout", vdata } });
+					bk.Add(new JObject {{ "txid", tx } , { "size", sz } , { "type", tp } , { "version", vs } , { "blockindex", bh } , { "sys_fee", sf }, { "net_fee", nf } });
 
 
 				}
@@ -1518,7 +1484,7 @@ namespace NEO_Block_API.lib
 			{
 				conn.Open();
 
-				string select = "select txid ,size, type ,version, blockheight, sys_fee, net_fee, vin , vout from tx_" + req.@params[0] +" where txid = '" + req.@params[1] + "'";
+				string select = "select txid ,size, type ,version, blockheight, sys_fee, net_fee from tx_" + req.@params[0] +" where txid = '" + req.@params[1] + "'";
 
 				MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1543,7 +1509,7 @@ namespace NEO_Block_API.lib
 
 
 
-					bk.Add(new JObject { { "txid", tx }, { "size", sz }, { "type", tp }, { "version", vs }, { "blockindex", bh }, { "sys_fee", sf }, { "net_fee", nf }, { "vin", adata }, { "vout", vdata } });
+					bk.Add(new JObject { { "txid", tx }, { "size", sz }, { "type", tp }, { "version", vs }, { "blockindex", bh }, { "sys_fee", sf }, { "net_fee", nf } });
 
 
 				}
@@ -1563,7 +1529,7 @@ namespace NEO_Block_API.lib
 
 				if (req.@params[2].ToString() == "")
 				{
-					string select = "select txid ,size, type ,version, blockheight, sys_fee, vin , vout from tx_0000000000000000000000000000000000000000 limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
+					string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_0000000000000000000000000000000000000000 limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
 
 					// inherently belongs to all app chain txs
 
@@ -1590,7 +1556,7 @@ namespace NEO_Block_API.lib
 
 
 
-						bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata }, { "vin", vin }, { "vout", vout } }); //
+						bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
 
 
 					}
@@ -1601,7 +1567,7 @@ namespace NEO_Block_API.lib
 
 				else if (req.@params[1].ToString() == null)
 				{
-					string select = "select txid ,size, type ,version, blockheight, sys_fee, vin , vout from tx where type='" + req.@params[2] + "'limit " + req.@params[0];
+					string select = "select txid ,size, type ,version, blockheight, sys_fee from tx where type='" + req.@params[2] + "'limit " + req.@params[0];
 
 					MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1626,7 +1592,7 @@ namespace NEO_Block_API.lib
 
 
 
-						bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockheight", bdata }, { "gas", sdata }, { "vin", JArray.Parse(vin) }, { "vout", JArray.Parse(vout) } });
+						bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockheight", bdata }, { "gas", sdata } });
 
 
 					}
@@ -1637,7 +1603,7 @@ namespace NEO_Block_API.lib
 				else  //((req.@params[0].ToString() != null ) && (req.@params[1].ToString() != null) && (req.@params[2].ToString() != null))
 						{
 
-					string select = "select txid ,size, type ,version, blockheight, sys_fee, vin , vout from tx where type='" + req.@params[2] + "'limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
+					string select = "select txid ,size, type ,version, blockheight, sys_fee from tx where type='" + req.@params[2] + "'limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
 
 
 					MySqlCommand cmd = new MySqlCommand(select, conn);
@@ -1663,7 +1629,7 @@ namespace NEO_Block_API.lib
 
 
 
-						bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockheight", bdata }, { "gas", sdata }, { "vin", JArray.Parse(vin) }, { "vout", JArray.Parse(vout) } });
+						bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockheight", bdata }, { "gas", sdata } });
 
 
 					}
@@ -1685,7 +1651,7 @@ namespace NEO_Block_API.lib
 
 				if (req.@params[2].ToString() == null)
 				{
-					string select = "select txid ,size, type ,version, blockheight, sys_fee, vin , vout from tx_" + req.@params[0]+" limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString());
+					string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_" + req.@params[0]+" limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString());
 
 
 					MySqlCommand cmd = new MySqlCommand(select, conn);
@@ -1711,7 +1677,7 @@ namespace NEO_Block_API.lib
 
 
 
-						bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata }, { "vin", vin }, { "vout", vout } }); //
+						bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
 
 
 					}
@@ -1722,7 +1688,7 @@ namespace NEO_Block_API.lib
 
 				else if (req.@params[1].ToString() == null)
 				{
-					string select = "select txid ,size, type ,version, blockheight, sys_fee, vin , vout from tx_"+ req.@params[0]+ "where type='" + req.@params[2] + " limit " + req.@params[0];
+					string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_"+ req.@params[0]+ "where type='" + req.@params[2] + " limit " + req.@params[0];
 
 					MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1747,7 +1713,7 @@ namespace NEO_Block_API.lib
 
 
 
-						bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockheight", bdata }, { "gas", sdata }, { "vin", JArray.Parse(vin) }, { "vout", JArray.Parse(vout) } });
+						bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockheight", bdata }, { "gas", sdata } });
 
 
 					}
@@ -1758,7 +1724,7 @@ namespace NEO_Block_API.lib
 				else  //((req.@params[0].ToString() != null ) && (req.@params[1].ToString() != null) && (req.@params[2].ToString() != null))
 				{
 
-					string select = "select txid ,size, type ,version, blockheight, sys_fee, vin , vout from tx_" + req.@params[0]+ " limit "+(int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString()); 
+					string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_" + req.@params[0]+ " limit "+(int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString()); 
 
 
 
@@ -1785,7 +1751,7 @@ namespace NEO_Block_API.lib
 
 
 
-						bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata }, { "vin", JArray.Parse(vin) }, { "vout", JArray.Parse(vout) } });
+						bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } });
 
 
 					}
