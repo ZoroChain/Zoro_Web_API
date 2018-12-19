@@ -42,7 +42,7 @@ namespace NEO_Block_API.Controllers
 
                 string ipAddr = Request.HttpContext.Connection.RemoteIpAddress.ToString();
 
-                var result = Json(api.getRes(req, ipAddr));
+                var result = Json(api.getResAsync(req, ipAddr));
                 if (DateTime.Now.Subtract(start).TotalSeconds > logExeTimeMax)
                 {
                     log.Info(logHelper.logInfoFormat(req, result, start));
@@ -95,7 +95,7 @@ namespace NEO_Block_API.Controllers
 
                     string ipAddr = Request.HttpContext.Connection.RemoteIpAddress.ToString();
 
-                    var result = Json(api.getRes(req, ipAddr));
+                    var result = Json(api.getResAsync(req, ipAddr));
                     if (DateTime.Now.Subtract(start).TotalSeconds > logExeTimeMax)
                     {
                         log.Info(logHelper.logInfoFormat(req, result, start));

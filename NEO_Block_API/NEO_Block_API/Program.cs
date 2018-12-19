@@ -13,6 +13,9 @@ namespace NEO_Block_API
 {
     public class Program
     {
+        public static string local = "http://115.159.53.39:20333";
+        public static string ChainID = "Zoro";
+
         public static void Main(string[] args)
         {
             BuildWebHost(args).Run();

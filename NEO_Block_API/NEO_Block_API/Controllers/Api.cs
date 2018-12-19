@@ -69,7 +69,7 @@ namespace NEO_Block_API.Controllers
                         };
         }
 
-        public object getRes(JsonRPCrequest req,string reqAddr)
+        public async Task<object> getResAsync(JsonRPCrequest req,string reqAddr)
         {
             JArray result = new JArray();
             string resultStr = string.Empty;
@@ -204,10 +204,10 @@ namespace NEO_Block_API.Controllers
                     #endregion
                     #region 获取balance
                     case "getbalance":
-						result = msq.GetBalance(req);
+						result = await msq.GetBalanceAsync(req);
 						break;
                     case "getappchainbalance":
-                        result = msq.GetAppChainBalance(req);
+                        result = await msq.GetAppChainBalanceAsync(req);
                         break;
                     #endregion
                     #region 获取utxo

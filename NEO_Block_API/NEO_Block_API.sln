@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "thinSDK_neo", "thinSDK_neo\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "thinSDK", "thinSDK\thinSDK.csproj", "{7B4D4D32-18AE-45EC-B0CC-32D328633F14}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zoro", "..\..\Zoro\Zoro\Zoro.csproj", "{3DD35978-A38F-43DB-9BE2-27112723046E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{7B4D4D32-18AE-45EC-B0CC-32D328633F14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B4D4D32-18AE-45EC-B0CC-32D328633F14}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7B4D4D32-18AE-45EC-B0CC-32D328633F14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DD35978-A38F-43DB-9BE2-27112723046E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DD35978-A38F-43DB-9BE2-27112723046E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DD35978-A38F-43DB-9BE2-27112723046E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DD35978-A38F-43DB-9BE2-27112723046E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

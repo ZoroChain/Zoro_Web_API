@@ -625,7 +625,7 @@ namespace NEO_Block_API.lib
 
 			}
 		}
-		public JArray GetBalance(JsonRPCrequest req) // needs to be changed for the right balance data
+		public async Task<JArray> GetBalanceAsync(JsonRPCrequest req) // needs to be changed for the right balance data
 		{
 			using (MySqlConnection conn = new MySqlConnection(conf))
 			{
@@ -643,8 +643,14 @@ namespace NEO_Block_API.lib
 				while (rdr.Read())
 				{
 					var asset = (rdr["asset"]).ToString();
-					
-					bk.Add(new JObject { { "asset", asset } });
+                    var jObject = new JObject();
+                    if (asset.Length == 42) {
+                        jObject = await InvokeHelper.getBalanceOfAsync("0000000000000000000000000000000000000000", asset, req.@params[0].ToString());
+                    }
+                    else {
+                        jObject = await InvokeHelper.getNativeBalanceOfAsync("0000000000000000000000000000000000000000", asset, req.@params[0].ToString());
+                    }
+                    bk.Add(jObject);
 
 				}
 
@@ -652,7 +658,7 @@ namespace NEO_Block_API.lib
 			}
 		}
 
-        public JArray GetAppChainBalance(JsonRPCrequest req) // needs to be changed for the right balance data
+        public async Task<JArray> GetAppChainBalanceAsync(JsonRPCrequest req) // needs to be changed for the right balance data
         {
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
@@ -670,7 +676,16 @@ namespace NEO_Block_API.lib
                 while (rdr.Read())
                 {
                     var asset = (rdr["asset"]).ToString();
-                    bk.Add(new JObject { { "asset", asset } });
+                    var jObject = new JObject();
+                    if (asset.Length == 42)
+                    {
+                        jObject = await InvokeHelper.getBalanceOfAsync(req.@params[0].ToString(), asset, req.@params[1].ToString());
+                    }
+                    else
+                    {
+                        jObject = await InvokeHelper.getNativeBalanceOfAsync(req.@params[0].ToString(), asset, req.@params[1].ToString());
+                    }
+                    bk.Add(jObject);
                 }
 
                 return res.result = bk;
