@@ -632,7 +632,7 @@ namespace NEO_Block_API.lib
 				conn.Open();
 
 
-				string select = "select id , addr, asset , value , used from utxo_0000000000000000000000000000000000000000 where used = 0 and addr='" + req.@params[0] + "'";
+				string select = "select asset from address_asset_0000000000000000000000000000000000000000 where addr='" + req.@params[0] + "'";
 
 				JsonPRCresponse res = new JsonPRCresponse();
 				MySqlCommand cmd = new MySqlCommand(select, conn);
@@ -642,14 +642,9 @@ namespace NEO_Block_API.lib
 				MySqlDataReader rdr = cmd.ExecuteReader();
 				while (rdr.Read())
 				{
-					var id = (rdr["id"]).ToString();
-					var ad = (rdr["addr"]).ToString();
-					var adata = (rdr["asset"]).ToString();
-					var ldata = (rdr["value"]).ToString();
-					var us = (rdr["used"]).ToString();
+					var asset = (rdr["asset"]).ToString();
 					
-
-					bk.Add(new JObject { { "rank", id }, { "addr", ad }, { "balance", ldata }, { "asset", adata }, { "used", us } });
+					bk.Add(new JObject { { "asset", asset } });
 
 				}
 
@@ -664,7 +659,7 @@ namespace NEO_Block_API.lib
                 conn.Open();
 
 
-                string select = "select id , addr, asset , value , used from utxo_"+req.@params[0]+" where used = 0 and addr='" + req.@params[1] + "'";
+                string select = "select asset from address_asset_" + req.@params[0]+" where addr='" + req.@params[1] + "'";
 
                 JsonPRCresponse res = new JsonPRCresponse();
                 MySqlCommand cmd = new MySqlCommand(select, conn);
@@ -674,15 +669,8 @@ namespace NEO_Block_API.lib
                 MySqlDataReader rdr = cmd.ExecuteReader();
                 while (rdr.Read())
                 {
-                    var id = (rdr["id"]).ToString();
-                    var ad = (rdr["addr"]).ToString();
-                    var adata = (rdr["asset"]).ToString();
-                    var ldata = (rdr["value"]).ToString();
-                    var us = (rdr["used"]).ToString();
-
-
-                    bk.Add(new JObject { { "rank", id }, { "addr", ad }, { "balance", ldata }, { "asset", adata }, { "used", us } });
-
+                    var asset = (rdr["asset"]).ToString();
+                    bk.Add(new JObject { { "asset", asset } });
                 }
 
                 return res.result = bk;
