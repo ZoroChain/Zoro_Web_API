@@ -27,7 +27,7 @@ namespace NEO_Block_API.lib
         {
             using (ScriptBuilder sb = new ScriptBuilder())
             {                
-                sb.EmitSysCall("Zoro.NativeNEP5.BalanceOf", UInt256.Parse(assetid), address);
+                sb.EmitSysCall("Zoro.NativeNEP5.BalanceOf", UInt256.Parse(assetid), ZoroHelper.GetPublicKeyHashFromAddress(address));
                 sb.EmitSysCall("Zoro.NativeNEP5.Decimals", UInt256.Parse(assetid));
                 sb.EmitSysCall("Zoro.NativeNEP5.Symbol", UInt256.Parse(assetid));
                 var info = await ZoroHelper.InvokeScript(sb.ToArray(), chainHash);
