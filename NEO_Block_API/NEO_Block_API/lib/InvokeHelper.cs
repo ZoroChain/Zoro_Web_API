@@ -39,31 +39,36 @@ namespace NEO_Block_API.lib
         static JObject GetBalanceFromJson(string info)
         {
             JObject result = null;
-            MyJson.JsonNode_Object json = MyJson.Parse(info) as MyJson.JsonNode_Object;
+            try
+            {               
+                MyJson.JsonNode_Object json = MyJson.Parse(info) as MyJson.JsonNode_Object;
 
-            if (json.ContainsKey("result"))
-            {
-                MyJson.JsonNode_Object json_result = json["result"] as MyJson.JsonNode_Object;
-                MyJson.JsonNode_Array stack = json_result["stack"] as MyJson.JsonNode_Array;
-
-                if (stack != null && stack.Count >= 2)
+                if (json.ContainsKey("result"))
                 {
-                    string balance = ZoroHelper.GetJsonValue(stack[0] as MyJson.JsonNode_Object);
-                    string decimals = ZoroHelper.GetJsonValue(stack[1] as MyJson.JsonNode_Object);
+                    MyJson.JsonNode_Object json_result = json["result"] as MyJson.JsonNode_Object;
+                    MyJson.JsonNode_Array stack = json_result["stack"] as MyJson.JsonNode_Array;
 
-                    string symbol = System.Text.Encoding.Default.GetString(ZoroHelper.HexString2Bytes((stack[2] as MyJson.JsonNode_Object)["value"].AsString()));
+                    if (stack != null && stack.Count >= 2)
+                    {
+                        string balance = ZoroHelper.GetJsonValue(stack[0] as MyJson.JsonNode_Object);
+                        string decimals = ZoroHelper.GetJsonValue(stack[1] as MyJson.JsonNode_Object);
 
-                    Decimal value = Decimal.Parse(balance) / new Decimal(Math.Pow(10, int.Parse(decimals)));
-                    string fmt = "{0:N" + decimals + "}";
-                    result = new JObject() { { "balance",string.Format(fmt, value)},{"name",symbol} };
+                        string symbol = System.Text.Encoding.Default.GetString(ZoroHelper.HexString2Bytes((stack[2] as MyJson.JsonNode_Object)["value"].AsString()));
+
+                        Decimal value = Decimal.Parse(balance) / new Decimal(Math.Pow(10, int.Parse(decimals)));
+                        string fmt = "{0:N" + decimals + "}";
+                        result = new JObject() { { "balance", string.Format(fmt, value) }, { "name", symbol } };
+                    }
+                }
+                else if (json.ContainsKey("error"))
+                {
+                    MyJson.JsonNode_Object json_error_obj = json["error"] as MyJson.JsonNode_Object;
+                    result = new JObject() { { "error", json_error_obj.ToString() } };
                 }
             }
-            else if (json.ContainsKey("error"))
-            {
-                MyJson.JsonNode_Object json_error_obj = json["error"] as MyJson.JsonNode_Object;
-                result = new JObject() { { "error", json_error_obj.ToString() } };
-            }
-
+            catch (Exception e) {
+                throw e;
+            }            
             return result;
         }
     }
