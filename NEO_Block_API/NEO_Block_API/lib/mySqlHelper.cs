@@ -234,7 +234,7 @@ namespace NEO_Block_API.lib
 				conn.Open();
 				var addr = req.@params[0].ToString();
 
-				string select = "select a.txid,a.addr,a.blocktime,a.blockindex,b.type,b.vout,b.vin from  address_tx_0000000000000000000000000000000000000000 as a , tx_0000000000000000000000000000000000000000 as b where @addr = addr and a.txid = b.txid limit " + req.@params[1];
+				string select = "select txid,addr,blocktime,blockindex from address_tx_0000000000000000000000000000000000000000 where @addr = addr limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + req.@params[1];
 
 				JsonPRCresponse res = new JsonPRCresponse();
 				MySqlCommand cmd = new MySqlCommand(select, conn);
@@ -245,23 +245,13 @@ namespace NEO_Block_API.lib
 				JArray bk = new JArray();
 				while (rdr.Read())
 				{
-
 					var adata = (rdr["txid"]).ToString();
 					var vdata = (rdr["addr"]).ToString();
 					var bt = (rdr["blocktime"]).ToString();
 					var bi = (rdr["blockindex"]).ToString();
-					var type = (rdr["type"]).ToString();
-					var vout = (rdr["vout"]).ToString();
-					var vin = (rdr["vin"]).ToString();
-
-					JObject t = new JObject() { { "$date", bt } };
-					JObject vo = new JObject() { { "$date", bt } };
-					bk.Add(new JObject { { "addr", vdata } , { "txid", adata }, { "blockindex", bi }, { "blocktime", t } , { "type", type }, { "vout", JArray.Parse(vout)} , { "vin",JArray.Parse(vin)}});
-
+					bk.Add(new JObject { { "addr", vdata } , { "txid", adata }, { "blockindex", bi }, { "blocktime", bt } });
 				}
-				JArray c = new JArray() { };
-				c.Add(new JObject { { "count", JToken.Parse("10") }, { "list", bk } });
-				return res.result = c;
+				return res.result = bk;
 
 			}
 		}
@@ -273,7 +263,7 @@ namespace NEO_Block_API.lib
                 conn.Open();
                 var addr = req.@params[1].ToString();
 
-                string select = "select a.txid,a.addr,a.blocktime,a.blockindex,b.type,b.vout,b.vin from  address_tx_"+req.@params[0]+ " as a , tx_" + req.@params[0] + " as b where @addr = addr and a.txid = b.txid limit " + req.@params[2];
+                string select = "select txid,addr,blocktime,blockindex from address_tx_" + req.@params[0].ToString() + " where @addr = addr limit " + (int.Parse(req.@params[2].ToString()) * int.Parse(req.@params[3].ToString())) + ", " + req.@params[2];
 
                 JsonPRCresponse res = new JsonPRCresponse();
                 MySqlCommand cmd = new MySqlCommand(select, conn);
@@ -284,24 +274,13 @@ namespace NEO_Block_API.lib
                 JArray bk = new JArray();
                 while (rdr.Read())
                 {
-
                     var adata = (rdr["txid"]).ToString();
                     var vdata = (rdr["addr"]).ToString();
                     var bt = (rdr["blocktime"]).ToString();
                     var bi = (rdr["blockindex"]).ToString();
-                    var type = (rdr["type"]).ToString();
-                    var vout = (rdr["vout"]).ToString();
-                    var vin = (rdr["vin"]).ToString();
-
-                    JObject t = new JObject() { { "$date", bt } };
-                    JObject vo = new JObject() { { "$date", bt } };
-                    bk.Add(new JObject { { "addr", vdata }, { "txid", adata }, { "blockindex", bi }, { "blocktime", t }, { "type", type }, { "vout", JArray.Parse(vout) }, { "vin", JArray.Parse(vin) } });
-
+                    bk.Add(new JObject { { "addr", vdata }, { "txid", adata }, { "blockindex", bi }, { "blocktime", bt } });
                 }
-                JArray c = new JArray() { };
-                c.Add(new JObject { { "count", JToken.Parse("10") }, { "list", bk } });
-                return res.result = c;
-
+                return res.result = bk;
             }
         }
 
