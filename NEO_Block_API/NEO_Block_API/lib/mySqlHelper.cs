@@ -1539,8 +1539,6 @@ namespace NEO_Block_API.lib
 						var vs = (rdr["version"]).ToString();
 						var bdata = (rdr["blockheight"]).ToString();
 						var sdata = int.Parse((rdr["sys_fee"]).ToString());
-						var vin = (rdr["vin"]).ToString();
-						var vout = (rdr["vout"]).ToString();
 
 
 
@@ -1575,8 +1573,6 @@ namespace NEO_Block_API.lib
 						var vs = (rdr["version"]).ToString();
 						var bdata = (rdr["blockheight"]).ToString();
 						var sdata = (rdr["sys_fee"]).ToString();
-						var vin = (rdr["vin"]).ToString();
-						var vout = (rdr["vout"]).ToString();
 
 
 
@@ -1612,8 +1608,6 @@ namespace NEO_Block_API.lib
 						var vs = (rdr["version"]).ToString();
 						var bdata = (rdr["blockheight"]).ToString();
 						var sdata = (rdr["sys_fee"]).ToString();
-						var vin = (rdr["vin"]).ToString();
-						var vout = (rdr["vout"]).ToString();
 
 
 
@@ -1637,7 +1631,7 @@ namespace NEO_Block_API.lib
 			{
 				conn.Open();
 
-				if (req.@params[2].ToString() == null)
+				if (req.@params[2].ToString() != null)
 				{
 					string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_" + req.@params[0]+" limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString());
 
@@ -1660,8 +1654,6 @@ namespace NEO_Block_API.lib
 						var vs = (rdr["version"]).ToString();
 						var bdata = (rdr["blockheight"]).ToString();
 						var sdata = int.Parse((rdr["sys_fee"]).ToString());
-						var vin = (rdr["vin"]).ToString();
-						var vout = (rdr["vout"]).ToString();
 
 
 
@@ -1674,7 +1666,7 @@ namespace NEO_Block_API.lib
 
 				}
 
-				else if (req.@params[1].ToString() == null)
+				else if (req.@params[1].ToString() != null)
 				{
 					string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_"+ req.@params[0]+ "where type='" + req.@params[2] + " limit " + req.@params[0];
 
@@ -1696,8 +1688,6 @@ namespace NEO_Block_API.lib
 						var vs = (rdr["version"]).ToString();
 						var bdata = (rdr["blockheight"]).ToString();
 						var sdata = (rdr["sys_fee"]).ToString();
-						var vin = (rdr["vin"]).ToString();
-						var vout = (rdr["vout"]).ToString();
 
 
 
@@ -1734,8 +1724,6 @@ namespace NEO_Block_API.lib
 						var vs = (rdr["version"]).ToString();
 						var bdata = (rdr["blockheight"]).ToString();
 						var sdata = (rdr["sys_fee"]).ToString();
-						var vin = (rdr["vin"]).ToString();
-						var vout = (rdr["vout"]).ToString();
 
 
 
