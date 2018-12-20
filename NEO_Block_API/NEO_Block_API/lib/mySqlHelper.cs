@@ -671,22 +671,28 @@ namespace NEO_Block_API.lib
                 MySqlCommand cmd = new MySqlCommand(select, conn);
                 JArray bk = new JArray();
 
-
-                MySqlDataReader rdr = cmd.ExecuteReader();
-                while (rdr.Read())
+                try
                 {
-                    var asset = (rdr["asset"]).ToString();
-                    var jObject = new JObject();
-                    if (asset.Length == 42)
+                    MySqlDataReader rdr = cmd.ExecuteReader();
+                    while (rdr.Read())
                     {
-                        jObject = await InvokeHelper.getBalanceOfAsync(req.@params[0].ToString(), asset, req.@params[1].ToString());
+                        var asset = (rdr["asset"]).ToString();
+                        var jObject = new JObject();
+                        if (asset.Length == 42)
+                        {
+                            jObject = await InvokeHelper.getBalanceOfAsync(req.@params[0].ToString(), asset, req.@params[1].ToString());
+                        }
+                        else
+                        {
+                            jObject = await InvokeHelper.getNativeBalanceOfAsync(req.@params[0].ToString(), asset, req.@params[1].ToString());
+                        }
+                        bk.Add(jObject);
                     }
-                    else
-                    {
-                        jObject = await InvokeHelper.getNativeBalanceOfAsync(req.@params[0].ToString(), asset, req.@params[1].ToString());
-                    }
-                    bk.Add(jObject);
                 }
+                catch (Exception e) {
+                    throw e;
+                }
+                
 
                 return res.result = bk;
             }

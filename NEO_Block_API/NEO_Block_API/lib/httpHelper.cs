@@ -205,7 +205,7 @@ namespace NEO_Block_API.lib
             }
             catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
             finally
             {
