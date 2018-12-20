@@ -27,7 +27,7 @@ namespace NEO_Block_API.Controllers
         Api api = Api.getTestApi();
 
         [HttpGet]
-        public JsonResult Get(string @jsonrpc, string @method, string @params, long @id)
+        public async Task<JsonResult> GetAsync(string @jsonrpc, string @method, string @params, long @id)
         {
             JsonRPCrequest req = null;
             DateTime start = DateTime.Now;
@@ -44,7 +44,8 @@ namespace NEO_Block_API.Controllers
 
                 string ipAddr = Request.HttpContext.Connection.RemoteIpAddress.ToString();
 
-                var result = Json(api.getResAsync(req, ipAddr));
+                var json = await api.getResAsync(req, ipAddr);
+                var result = Json(json);
                 if (DateTime.Now.Subtract(start).TotalSeconds > logExeTimeMax)
                 {
                     log.Info(logHelper.logInfoFormat(req, result, start));
@@ -97,7 +98,8 @@ namespace NEO_Block_API.Controllers
 
                 string ipAddr = Request.HttpContext.Connection.RemoteIpAddress.ToString();
 
-                var result = Json(api.getResAsync(req, ipAddr));
+                var json = await api.getResAsync(req, ipAddr);
+                var result = Json(json);
                 if (DateTime.Now.Subtract(start).TotalSeconds > logExeTimeMax)
                 {
                     log.Info(logHelper.logInfoFormat(req, result, start));
