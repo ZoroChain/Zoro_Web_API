@@ -1057,7 +1057,95 @@ namespace NEO_Block_API.lib
 			}
 		}
 
-		public JArray GetNep5Asset(JsonRPCrequest req)
+        public JArray GetBlocksDESC(JsonRPCrequest req)
+        {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                JsonPRCresponse res = new JsonPRCresponse();
+                conn.Open();
+
+
+                string select = "select  size , version, hash , previousblockhash , merkleroot , time , indexx , nonce , nextconsensus , script ,tx  from block_0000000000000000000000000000000000000000 ORDER BY id DESC limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+
+                while (rdr.Read())
+                {
+
+                    var sdata = (rdr["size"]).ToString();
+                    var adata = (rdr["version"]).ToString();
+                    var hash = (rdr["hash"]).ToString();
+                    var pdata = (rdr["previousblockhash"]).ToString();
+                    var ind = (rdr["indexx"]).ToString();
+                    var mdata = (rdr["merkleroot"]).ToString();
+                    var tdata = (rdr["time"]).ToString();
+                    var ndata = (rdr["nonce"]).ToString();
+                    var nc = (rdr["nextconsensus"]).ToString();
+                    var s = (rdr["script"]).ToString();
+                    var tx = (rdr["tx"]).ToString();
+
+
+                    bk.Add(new JObject { { "size", sdata }, { "version", adata }, { "hash", hash }, { "previousblockhash", pdata }, { "index", ind }, { "merkleroot", mdata }, { "time", tdata }, { "nonce", ndata }, { "nextconsensus", nc }, { "script", s }, { "tx", JArray.Parse(tx) } });
+                }
+
+                return res.result = bk;
+
+
+
+            }
+        }
+
+
+        public JArray GetAppchainBlocksDESC(JsonRPCrequest req)
+        {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                JsonPRCresponse res = new JsonPRCresponse();
+                conn.Open();
+
+
+                string select = "select  size , version, hash , previousblockhash , merkleroot , time , indexx , nonce , nextconsensus , script ,tx from block_" + req.@params[0] + " ORDER BY id DESC limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString());
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+
+                while (rdr.Read())
+                {
+
+                    var sdata = (rdr["size"]).ToString();
+                    var adata = (rdr["version"]).ToString();
+                    var hash = (rdr["hash"]).ToString();
+                    var pdata = (rdr["previousblockhash"]).ToString();
+                    var ind = (rdr["indexx"]).ToString();
+                    var mdata = (rdr["merkleroot"]).ToString();
+                    var tdata = (rdr["time"]).ToString();
+                    var ndata = (rdr["nonce"]).ToString();
+                    var nc = (rdr["nextconsensus"]).ToString();
+
+                    var s = (rdr["script"]).ToString();
+                    var tx = (rdr["tx"]).ToString();
+
+
+                    bk.Add(new JObject { { "size", sdata }, { "version", adata }, { "hash", hash }, { "previousblockhash", pdata }, { "index", ind }, { "merkleroot", mdata }, { "time", tdata }, { "nonce", ndata }, { "nextconsensus", nc }, { "script", s }, { "tx", JArray.Parse(tx) } });
+                }
+
+                return res.result = bk;
+
+
+
+            }
+        }
+
+        public JArray GetNep5Asset(JsonRPCrequest req)
 		{
 			using (MySqlConnection conn = new MySqlConnection(conf))
 			{
@@ -1554,7 +1642,7 @@ namespace NEO_Block_API.lib
             {
                 conn.Open();
 
-                string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_0000000000000000000000000000000000000000 DESC limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
+                string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_0000000000000000000000000000000000000000 order by id desc limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1585,7 +1673,7 @@ namespace NEO_Block_API.lib
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 conn.Open();
-                string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_" + req.@params[0] + " DESC limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString());
+                string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_" + req.@params[0] + " order by id desc limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString());
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 

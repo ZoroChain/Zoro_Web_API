@@ -94,6 +94,12 @@ namespace NEO_Block_API.Controllers
                     case "getappchainblocks":
                         result = msq.GetAppchainBlocks(req);
                         break;
+                    case "getblocksdesc":
+                        result = msq.GetBlocksDESC(req);
+                        break;
+                    case "getappchainblocksdesc":
+                        result = msq.GetAppchainBlocksDESC(req);
+                        break;
                     #endregion
                     #region 获取block from hash
                     case "getblockfromhash":
