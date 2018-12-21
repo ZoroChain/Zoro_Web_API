@@ -1438,30 +1438,18 @@ namespace NEO_Block_API.lib
 				MySqlDataReader rdr = cmd.ExecuteReader();
 				JArray bk = new JArray();
 				while (rdr.Read())
-				{
-
-					
+				{					
 					var tx = (rdr["txid"]).ToString();
 					var sz = (rdr["size"]).ToString();
 					var tp = (rdr["type"]).ToString();
 					var vs = (rdr["version"]).ToString();
 					var bh = (rdr["blockheight"]).ToString();
 					var sf = (rdr["sys_fee"]).ToString();
-					var nf = (rdr["net_fee"]).ToString();
-					var adata = (rdr["vin"]).ToString();
-					var vdata = (rdr["vout"]).ToString();
+					var nf = (rdr["net_fee"]).ToString();				
 				
-
-					
-
 					bk.Add(new JObject {{ "txid", tx } , { "size", sz } , { "type", tp } , { "version", vs } , { "blockindex", bh } , { "sys_fee", sf }, { "net_fee", nf } });
-
-
 				}
-
 				return res.result = bk;
-
-
 			}
 
 		}
@@ -1482,8 +1470,6 @@ namespace NEO_Block_API.lib
 				JArray bk = new JArray();
 				while (rdr.Read())
 				{
-
-
 					var tx = (rdr["txid"]).ToString();
 					var sz = (rdr["size"]).ToString();
 					var tp = (rdr["type"]).ToString();
@@ -1491,20 +1477,10 @@ namespace NEO_Block_API.lib
 					var bh = (rdr["blockheight"]).ToString();
 					var sf = (rdr["sys_fee"]).ToString();
 					var nf = (rdr["net_fee"]).ToString();
-					var adata = (rdr["vin"]).ToString();
-					var vdata = (rdr["vout"]).ToString();
-
-
-
 
 					bk.Add(new JObject { { "txid", tx }, { "size", sz }, { "type", tp }, { "version", vs }, { "blockindex", bh }, { "sys_fee", sf }, { "net_fee", nf } });
-
-
 				}
-
 				return res.result = bk;
-
-
 			}
 
 		}
