@@ -142,6 +142,12 @@ namespace NEO_Block_API.Controllers
                     case "getappchainrawtransactions":
 						result = msq.GetAppchainRawTransactions(req);
 						break;
+                    case "getrawtransactionsdesc":
+                        result = msq.GetRawTransactionsDESC(req);
+                        break;
+                    case "getappchainrawtransactionsdesc":
+                        result = msq.GetAppchainRawTransactionsDESC(req);
+                        break;
                     #endregion
                     #region 获取allnep5asset
                     case "getallnep5asset":

@@ -1491,111 +1491,27 @@ namespace NEO_Block_API.lib
 			{
 				conn.Open();
 
-				if (req.@params[2].ToString() == "")
+				string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_0000000000000000000000000000000000000000 limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
+
+				MySqlCommand cmd = new MySqlCommand(select, conn);
+
+				JsonPRCresponse res = new JsonPRCresponse();
+
+				MySqlDataReader rdr = cmd.ExecuteReader();
+
+				JArray bk = new JArray();
+				while (rdr.Read())
 				{
-					string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_0000000000000000000000000000000000000000 limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
+					var adata = (rdr["txid"]).ToString();
+					var size = int.Parse((rdr["size"]).ToString());
+					var type = (rdr["type"]).ToString();
+					var vs = (rdr["version"]).ToString();
+					var bdata = (rdr["blockheight"]).ToString();
+					var sdata = int.Parse((rdr["sys_fee"]).ToString());
 
-					// inherently belongs to all app chain txs
-
-					MySqlCommand cmd = new MySqlCommand(select, conn);
-
-
-
-					JsonPRCresponse res = new JsonPRCresponse();
-
-					MySqlDataReader rdr = cmd.ExecuteReader();
-
-					JArray bk = new JArray();
-					while (rdr.Read())
-					{
-
-						var adata = (rdr["txid"]).ToString();
-						var size = int.Parse((rdr["size"]).ToString());
-						var type = (rdr["type"]).ToString();
-						var vs = (rdr["version"]).ToString();
-						var bdata = (rdr["blockheight"]).ToString();
-						var sdata = int.Parse((rdr["sys_fee"]).ToString());
-
-
-
-						bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
-
-
-					}
-
-					return res.result = bk;
-
+					bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
 				}
-
-				else if (req.@params[1].ToString() == null)
-				{
-					string select = "select txid ,size, type ,version, blockheight, sys_fee from tx where type='" + req.@params[2] + "'limit " + req.@params[0];
-
-					MySqlCommand cmd = new MySqlCommand(select, conn);
-
-
-
-					JsonPRCresponse res = new JsonPRCresponse();
-
-					MySqlDataReader rdr = cmd.ExecuteReader();
-
-					JArray bk = new JArray();
-					while (rdr.Read())
-					{
-
-						var adata = (rdr["txid"]).ToString();
-						var size = (rdr["size"]).ToString();
-						var type = (rdr["type"]).ToString();
-						var vs = (rdr["version"]).ToString();
-						var bdata = (rdr["blockheight"]).ToString();
-						var sdata = (rdr["sys_fee"]).ToString();
-
-
-
-						bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockheight", bdata }, { "gas", sdata } });
-
-
-					}
-
-					return res.result = bk;
-				}
-
-				else  //((req.@params[0].ToString() != null ) && (req.@params[1].ToString() != null) && (req.@params[2].ToString() != null))
-						{
-
-					string select = "select txid ,size, type ,version, blockheight, sys_fee from tx where type='" + req.@params[2] + "'limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
-
-
-					MySqlCommand cmd = new MySqlCommand(select, conn);
-
-
-
-					JsonPRCresponse res = new JsonPRCresponse();
-
-					MySqlDataReader rdr = cmd.ExecuteReader();
-
-					JArray bk = new JArray();
-					while (rdr.Read())
-					{
-
-						var adata = (rdr["txid"]).ToString();
-						var size = (rdr["size"]).ToString();
-						var type = (rdr["type"]).ToString();
-						var vs = (rdr["version"]).ToString();
-						var bdata = (rdr["blockheight"]).ToString();
-						var sdata = (rdr["sys_fee"]).ToString();
-
-
-
-						bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockheight", bdata }, { "gas", sdata } });
-
-
-					}
-
-					return res.result = bk;
-
-				}
-
+				return res.result = bk;				
 			}
 
 		}
@@ -1606,119 +1522,96 @@ namespace NEO_Block_API.lib
 			using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				conn.Open();
+				string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_" + req.@params[0]+" limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString());
 
-				if (req.@params[2].ToString() != null)
-				{
-					string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_" + req.@params[0]+" limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString());
+				MySqlCommand cmd = new MySqlCommand(select, conn);
 
+				JsonPRCresponse res = new JsonPRCresponse();
 
-					MySqlCommand cmd = new MySqlCommand(select, conn);
+				MySqlDataReader rdr = cmd.ExecuteReader();
 
-
-
-					JsonPRCresponse res = new JsonPRCresponse();
-
-					MySqlDataReader rdr = cmd.ExecuteReader();
-
-					JArray bk = new JArray();
-					while (rdr.Read())
-					{
-
-						var adata = (rdr["txid"]).ToString();
-						var size = int.Parse((rdr["size"]).ToString());
-						var type = (rdr["type"]).ToString();
-						var vs = (rdr["version"]).ToString();
-						var bdata = (rdr["blockheight"]).ToString();
-						var sdata = int.Parse((rdr["sys_fee"]).ToString());
-
-
-
-						bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
-
-
-					}
-
-					return res.result = bk;
-
-				}
-
-				else if (req.@params[1].ToString() != null)
-				{
-					string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_"+ req.@params[0]+ "where type='" + req.@params[2] + " limit " + req.@params[0];
-
-					MySqlCommand cmd = new MySqlCommand(select, conn);
-
-
-
-					JsonPRCresponse res = new JsonPRCresponse();
-
-					MySqlDataReader rdr = cmd.ExecuteReader();
-
-					JArray bk = new JArray();
-					while (rdr.Read())
-					{
-
-						var adata = (rdr["txid"]).ToString();
-						var size = (rdr["size"]).ToString();
-						var type = (rdr["type"]).ToString();
-						var vs = (rdr["version"]).ToString();
-						var bdata = (rdr["blockheight"]).ToString();
-						var sdata = (rdr["sys_fee"]).ToString();
-
-
-
-						bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockheight", bdata }, { "gas", sdata } });
-
-
-					}
-
-					return res.result = bk;
-				}
-
-				else  //((req.@params[0].ToString() != null ) && (req.@params[1].ToString() != null) && (req.@params[2].ToString() != null))
+				JArray bk = new JArray();
+				while (rdr.Read())
 				{
 
-					string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_" + req.@params[0]+ " limit "+(int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString()); 
+					var adata = (rdr["txid"]).ToString();
+					var size = int.Parse((rdr["size"]).ToString());
+					var type = (rdr["type"]).ToString();
+					var vs = (rdr["version"]).ToString();
+					var bdata = (rdr["blockheight"]).ToString();
+					var sdata = int.Parse((rdr["sys_fee"]).ToString());
 
-
-
-					MySqlCommand cmd = new MySqlCommand(select, conn);
-
-
-
-					JsonPRCresponse res = new JsonPRCresponse();
-
-					MySqlDataReader rdr = cmd.ExecuteReader();
-
-					JArray bk = new JArray();
-					while (rdr.Read())
-					{
-
-						var adata = (rdr["txid"]).ToString();
-						var size = (rdr["size"]).ToString();
-						var type = (rdr["type"]).ToString();
-						var vs = (rdr["version"]).ToString();
-						var bdata = (rdr["blockheight"]).ToString();
-						var sdata = (rdr["sys_fee"]).ToString();
-
-
-
-						bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } });
-
-
-					}
-
-					return res.result = bk;
-
+					bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
 				}
-
+				return res.result = bk;
 			}
 
 		}
 
+        public JArray GetRawTransactionsDESC(JsonRPCrequest req)  // needs a sorting by txtype miner , reg or issue
+        {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();
+
+                string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_0000000000000000000000000000000000000000 DESC limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                JsonPRCresponse res = new JsonPRCresponse();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+                while (rdr.Read())
+                {
+                    var adata = (rdr["txid"]).ToString();
+                    var size = int.Parse((rdr["size"]).ToString());
+                    var type = (rdr["type"]).ToString();
+                    var vs = (rdr["version"]).ToString();
+                    var bdata = (rdr["blockheight"]).ToString();
+                    var sdata = int.Parse((rdr["sys_fee"]).ToString());
+
+                    bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
+                }
+                return res.result = bk;
+            }
+
+        }
 
 
-		public JArray GetUTXO(JsonRPCrequest req)
+        public JArray GetAppchainRawTransactionsDESC(JsonRPCrequest req)  // needs a sorting by txtype miner , reg or issue
+        {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();
+                string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_" + req.@params[0] + " DESC limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString());
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                JsonPRCresponse res = new JsonPRCresponse();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+                while (rdr.Read())
+                {
+
+                    var adata = (rdr["txid"]).ToString();
+                    var size = int.Parse((rdr["size"]).ToString());
+                    var type = (rdr["type"]).ToString();
+                    var vs = (rdr["version"]).ToString();
+                    var bdata = (rdr["blockheight"]).ToString();
+                    var sdata = int.Parse((rdr["sys_fee"]).ToString());
+
+                    bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
+                }
+                return res.result = bk;
+            }
+
+        }
+
+        public JArray GetUTXO(JsonRPCrequest req)
 		{
 
 			using (MySqlConnection conn = new MySqlConnection(conf))
