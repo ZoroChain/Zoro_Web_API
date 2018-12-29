@@ -246,19 +246,28 @@ namespace NEO_Block_API.Controllers
                         result = msq.GetAppChainRankByAssetCount(req);
                         break;
                     #endregion
+                    #region 获取nep5transferbytxid
+                    case "getnep5transferbytxid":
+                        result = msq.GetNep5TransferByTxid(req);
+                        break;
+                    case "getappchainnep5transferbytxid":
+                        result = msq.GetAppChainNep5TransferByTxid(req);
+                        break;
+                    #endregion
+                    #region 获取nep5transfer
                     case "getnep5transfer":
 						result = msq.GetNep5Transfer(req);
 						break;
-					case "getnep5count":
+                    case "getappchainnep5transfer":
+                        result = msq.GetAppChainNep5Transfer(req);
+                        break;
+                    #endregion
+                    case "getnep5count":
 						result = msq.GetNep5Count(req);
 						break;
 					case "getnep5transfersbyasset":
 						result = msq.GetNep5TransfersByAsset(req);
-						break;
-
-					case "getnep5transferbytxid":
-						result = msq.GetNep5TransferByTxid(req);
-						break;
+						break;					
 					case "getnep5allnep5assetofaddress":
 						result = msq.GetAllNep5AssetOfAddress(req);
 						break;								                   

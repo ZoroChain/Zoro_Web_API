@@ -1358,8 +1358,65 @@ namespace NEO_Block_API.lib
 			}
 		}
 
+        public JArray GetAppChainNep5Transfer(JsonRPCrequest req)
+        {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
 
-		public JArray GetNep5TransfersByAsset(JsonRPCrequest req)
+                conn.Open();
+                var txid = req.@params[1].ToString();
+
+                string select = "select blockindex, n , asset , fromx , tox , value from nep5transfer_" + req.@params[0] + " where txid = @txid";
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+                cmd.Parameters.AddWithValue("@txid", txid);
+
+
+                JsonPRCresponse res = new JsonPRCresponse();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                while (rdr.Read())
+                {
+                    var bdata = (rdr["blockindex"]).ToString();
+                    var ndata = (rdr["n"]).ToString();
+                    var adata = (rdr["asset"]).ToString();
+                    var fdata = (rdr["fromx"]).ToString();
+                    var tdata = (rdr["tox"]).ToString();
+                    var vdata = (rdr["value"]).ToString();
+
+                    JArray bk = new JArray {
+                    new JObject    {
+                                        {"blockindex",bdata}
+                                   },
+                    new JObject    {
+                                        {"n",ndata}
+                                   },
+                    new JObject    {
+                                        {"asset",adata}
+                                   },
+                    new JObject    {
+                                        {"from",fdata}
+                                   },
+                    new JObject    {
+                                        {"to",tdata}
+                                   },
+                    new JObject    {
+                                        {"value",vdata}
+                                   },
+
+
+                               };
+
+                    res.result = bk;
+                }
+
+                return res.result;
+
+            }
+        }
+
+
+        public JArray GetNep5TransfersByAsset(JsonRPCrequest req)
 		{
 			using (MySqlConnection conn = new MySqlConnection(conf))
 			{
@@ -1437,7 +1494,43 @@ namespace NEO_Block_API.lib
 
 			}
 		}
-		public JArray GetNep5Count(JsonRPCrequest req)
+
+        public JArray GetAppChainNep5TransferByTxid(JsonRPCrequest req)
+        {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+
+                conn.Open();
+
+
+                string select = "select  id , asset , fromx , tox , value from nep5transfer_" + req.@params[0] + " where txid = '" + req.@params[1] + "'";
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+
+
+                JsonPRCresponse res = new JsonPRCresponse();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                JArray bk = new JArray();
+                while (rdr.Read())
+                {
+
+                    var idata = (rdr["id"]).ToString();
+                    var adata = (rdr["asset"]).ToString();
+                    var fdata = (rdr["fromx"]).ToString();
+                    var tdata = (rdr["tox"]).ToString();
+                    var vdata = (rdr["value"]).ToString();
+
+
+                    bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata } });
+                }
+
+                return res.result = bk;
+
+            }
+        }
+        public JArray GetNep5Count(JsonRPCrequest req)
 		{
 			using (MySqlConnection conn = new MySqlConnection(conf))
 			{
