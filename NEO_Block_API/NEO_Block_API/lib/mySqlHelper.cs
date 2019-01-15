@@ -1262,6 +1262,36 @@ namespace NEO_Block_API.lib
 
 		}
 
+        public JArray GetNep5AssetByAddress(string chainHash, string address) {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();
+                string select = "";
+                if (chainHash == "")
+                    select = "select asset, type from address_asset_0000000000000000000000000000000000000000 where addr='" + address + "'";
+                else
+                    select = "select asset, type from address_asset_" + chainHash + " where addr='" + address + "'";
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                JsonPRCresponse res = new JsonPRCresponse();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                JArray bk = new JArray();
+                while (rdr.Read())
+                {
+
+                    var assetid = (rdr["asset"]).ToString();
+                    var type = (rdr["type"]).ToString();
+
+                    bk.Add(new JObject { { "assetid", assetid }, { "type", type } });
+
+                }
+                return res.result = bk;
+
+            }
+        }
+
         public JArray GetAllNep5AssetByChainHash(JsonRPCrequest req)
         {
             using (MySqlConnection conn = new MySqlConnection(conf))
@@ -1299,6 +1329,66 @@ namespace NEO_Block_API.lib
 
             }
 
+        }
+
+        public JArray GetNep5TranferFromToAddress(string chainHash, string toAddress)
+        {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();
+                string select = "";
+                if (chainHash == "")
+                    select = "select blockindex, txid, n , asset , fromx , tox , value from nep5transfer_0000000000000000000000000000000000000000 where tox = @to";
+                else
+                    select = "select blockindex, txid, n , asset , fromx , tox , value from nep5transfer_" + chainHash + " where tox = @to";          
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+                cmd.Parameters.AddWithValue("@to", toAddress);
+
+                JsonPRCresponse res = new JsonPRCresponse();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                while (rdr.Read())
+                {
+                    var bdata = (rdr["blockindex"]).ToString();
+                    var txid = (rdr["txid"]).ToString();
+                    var ndata = (rdr["n"]).ToString();
+                    var adata = (rdr["asset"]).ToString();
+                    var fdata = (rdr["fromx"]).ToString();
+                    var tdata = (rdr["tox"]).ToString();
+                    var vdata = (rdr["value"]).ToString();
+
+                    JArray bk = new JArray {
+                    new JObject     {
+                                        { "txid", txid} 
+                                     },
+                    new JObject    {
+                                        {"blockindex",bdata}
+                                   },
+                    new JObject    {
+                                        {"n",ndata}
+                                   },
+                    new JObject    {
+                                        {"asset",adata}
+                                   },
+                    new JObject    {
+                                        {"from",fdata}
+                                   },
+                    new JObject    {
+                                        {"to",tdata}
+                                   },
+                    new JObject    {
+                                        {"value",vdata}
+                                   },
+
+
+                               };
+
+                    res.result = bk;
+                }
+
+                return res.result;
+            }
         }
 
         public JArray GetNep5Transfer(JsonRPCrequest req)
@@ -2003,8 +2093,8 @@ namespace NEO_Block_API.lib
 
 						JArray bk = new JArray {
 					 new JObject    {
-										{"indexx",adata}
-								   }
+										{"blockDataHeight",adata}, { "txDataHeight", adata}, { "utxoDataHeight", adata}, { "notifyDataHeight", adata}, { "fulllogDataHeight", adata}
+                                   }
 
 							   }; 
 
@@ -2045,8 +2135,9 @@ namespace NEO_Block_API.lib
 
 					JArray bk = new JArray {
 					new JObject    {
-										{"blockcount",adata}
-								   }
+										//{"blockcount",adata}
+                                        {"blockDataHeight",adata}, { "txDataHeight", adata}, { "utxoDataHeight", adata}, { "notifyDataHeight", adata}, { "fulllogDataHeight", adata}
+                                   }
 
 
 							   };

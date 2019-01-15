@@ -1,4 +1,5 @@
 ﻿using Neo.VM;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,10 +14,12 @@ using Zoro.Network.P2P.Payloads;
 using Zoro.SmartContract;
 using Zoro.Wallets;
 
-namespace NEO_Block_API.lib
+namespace NEO_Block_API
 {
     class ZoroHelper
     {
+        public static string ZoroUrl = "http://47.91.210.16:20333";
+
         public static UInt160 Parse(string value)
         {
             if (value.StartsWith("0x"))
@@ -173,42 +176,22 @@ namespace NEO_Block_API.lib
             return outd;
         }
 
-        public static void PushRandomBytes(ScriptBuilder sb, int count = 32)
-        {
-            MyJson.JsonNode_Array array = new MyJson.JsonNode_Array();
-            byte[] randomBytes = new byte[count];
-            using (System.Security.Cryptography.RandomNumberGenerator rng = System.Security.Cryptography.RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(randomBytes);
-            }
-            BigInteger randomNum = new BigInteger(randomBytes);
-            sb.EmitPush(randomNum);
-            sb.EmitPush(Neo.VM.OpCode.DROP);
-        }
-
         public static async Task<string> InvokeScript(byte[] script, string chainHash)
         {
             string scriptPublish = script.ToHexString();
 
             byte[] postdata;
             string url;
-            if (Program.ChainID == "Zoro")
-            {
-                MyJson.JsonNode_Array postArray = new MyJson.JsonNode_Array();
-                postArray.AddArrayValue(chainHash);
-                postArray.AddArrayValue(scriptPublish);
+            JArray postArray = new JArray();
+            postArray.Add(chainHash);
+            postArray.Add(scriptPublish);
 
-                url = httpHelper.MakeRpcUrlPost(Program.local, "invokescript", out postdata, postArray.ToArray());
-            }
-            else
-            {
-                url = httpHelper.MakeRpcUrlPost(Program.local, "invokescript", out postdata, new MyJson.JsonNode_ValueString(scriptPublish));
-            }
+            url = Helper.MakeRpcUrlPost(ZoroUrl, "invokescript", out postdata, postArray);
 
             string result = "";
             try
             {
-                result = await httpHelper.HttpPost(url, postdata);
+                result = await Helper.HttpPost(url, postdata);
 
             }
             catch (Exception)
@@ -222,40 +205,22 @@ namespace NEO_Block_API.lib
         {
             var info = await InvokeScript(script, chainHash);
 
-            MyJson.JsonNode_Object json_result_array = MyJson.Parse(info) as MyJson.JsonNode_Object;
-            MyJson.JsonNode_Object json_result_obj = json_result_array["result"] as MyJson.JsonNode_Object;
+            JObject json_result_array = JObject.Parse(info) as JObject;
+            JObject json_result_obj = json_result_array["result"] as JObject;
 
             var consume = json_result_obj["gas_consumed"].ToString();
             return decimal.Parse(consume);
-        }
-
-        public static string GetJsonValue(MyJson.JsonNode_Object item)
-        {
-            var type = item["type"].ToString();
-            var value = item["value"];
-            if (type == "ByteArray")
-            {
-                var bt = HexString2Bytes(value.AsString());
-                var num = new BigInteger(bt);
-                return num.ToString();
-
-            }
-            else if (type == "Integer")
-            {
-                return value.ToString();
-
-            }
-            return "";
         }
 
         public static InvocationTransaction MakeTransaction(byte[] script, KeyPair keypair, Fixed8 gasLimit, Fixed8 gasPrice)
         {
             InvocationTransaction tx = new InvocationTransaction
             {
+                Nonce = Transaction.GetNonce(),
                 Script = script,
                 GasPrice = gasPrice,
                 GasLimit = gasLimit.Ceiling(),
-                ScriptHash = GetPublicKeyHash(keypair.PublicKey)
+                Account = GetPublicKeyHash(keypair.PublicKey)
             };
 
             tx.Attributes = new TransactionAttribute[0];
@@ -271,10 +236,11 @@ namespace NEO_Block_API.lib
         {
             InvocationTransaction tx = new InvocationTransaction
             {
+                Nonce = Transaction.GetNonce(),
                 Script = script,
                 GasPrice = gasPrice,
                 GasLimit = gasLimit.Ceiling(),
-                ScriptHash = GetMultiSigRedeemScriptHash(m, keypairs)
+                Account = GetMultiSigRedeemScriptHash(m, keypairs)
             };
 
             int count = keypairs.Length;
@@ -295,52 +261,26 @@ namespace NEO_Block_API.lib
             return tx;
         }
 
-        public static ContractTransaction MakeContractTransaction(UInt256 assetId, KeyPair keypair, UInt160 targetScriptHash, Fixed8 value, Fixed8 gasPrice)
-        {
-            ContractTransaction tx = new ContractTransaction
-            {
-                AssetId = assetId,
-                From = GetPublicKeyHash(keypair.PublicKey),
-                To = targetScriptHash,
-                Value = value,
-                GasPrice = gasPrice
-            };
-
-            tx.Attributes = new TransactionAttribute[0];
-
-            byte[] data = GetHashData(tx);
-            byte[] signdata = Sign(data, keypair.PrivateKey, keypair.PublicKey);
-            AddWitness(tx, signdata, keypair.PublicKey);
-
-            return tx;
-        }
-
         public static async Task<string> SendRawTransaction(string rawdata, string chainHash)
         {
             string url;
             byte[] postdata;
 
-            if (Program.ChainID == "Zoro")
-            {
-                MyJson.JsonNode_Array postRawArray = new MyJson.JsonNode_Array();
-                postRawArray.AddArrayValue(chainHash);
-                postRawArray.AddArrayValue(rawdata);
+            JArray postRawArray = new JArray();
+            postRawArray.Add(chainHash);
+            postRawArray.Add(rawdata);
 
-                url = httpHelper.MakeRpcUrlPost(Program.local, "sendrawtransaction", out postdata, postRawArray.ToArray());
-            }
-            else
-            {
-                url = httpHelper.MakeRpcUrlPost(Program.local, "sendrawtransaction", out postdata, new MyJson.JsonNode_ValueString(rawdata));
-            }
+            url = Helper.MakeRpcUrlPost(ZoroUrl, "sendrawtransaction", out postdata, postRawArray);
 
             string result = "";
             try
             {
-                result = await httpHelper.HttpPost(url, postdata);
+                result = await Helper.HttpPost(url, postdata);
 
             }
             catch (Exception)
             {
+                //Console.WriteLine(e.Message);
             }
 
             return result;
@@ -356,15 +296,6 @@ namespace NEO_Block_API.lib
         public static async Task<string> SendInvocationTransaction(byte[] script, int m, KeyPair[] keypairs, string chainHash, Fixed8 gasLimit, Fixed8 gasPrice)
         {
             InvocationTransaction tx = MakeMultiSignatureTransaction(script, m, keypairs, gasLimit, gasPrice);
-
-            return await SendRawTransaction(tx.ToArray().ToHexString(), chainHash);
-        }
-
-        public static async Task<string> SendContractTransaction(UInt256 assetId, KeyPair keypair, UInt160 targetScriptHash, Fixed8 value, string chainHash, Fixed8 gasPrice)
-        {
-            ContractTransaction tx = MakeContractTransaction(assetId, keypair, targetScriptHash, value, gasPrice);
-
-            string rawdata = tx.ToArray().ToHexString();
 
             return await SendRawTransaction(tx.ToArray().ToHexString(), chainHash);
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 using Neo.VM;
 using Newtonsoft.Json.Linq;
@@ -40,36 +41,65 @@ namespace NEO_Block_API.lib
         {
             JObject result = null;
             try
-            {               
-                MyJson.JsonNode_Object json = MyJson.Parse(info) as MyJson.JsonNode_Object;
+            {
+                JObject json = JObject.Parse(info) as JObject;
 
                 if (json.ContainsKey("result"))
                 {
-                    MyJson.JsonNode_Object json_result = json["result"] as MyJson.JsonNode_Object;
-                    MyJson.JsonNode_Array stack = json_result["stack"] as MyJson.JsonNode_Array;
+                    JObject json_result = json["result"] as JObject;
+                    JArray stack = json_result["stack"] as JArray;
 
                     if (stack != null && stack.Count >= 2)
                     {
-                        string balance = ZoroHelper.GetJsonValue(stack[0] as MyJson.JsonNode_Object);
-                        string decimals = ZoroHelper.GetJsonValue(stack[1] as MyJson.JsonNode_Object);
-
-                        string symbol = System.Text.Encoding.Default.GetString(ZoroHelper.HexString2Bytes((stack[2] as MyJson.JsonNode_Object)["value"].AsString()));
+                        string balance = GetJsonValue(stack[0] as JObject);
+                        string decimals = GetJsonValue(stack[1] as JObject);
 
                         Decimal value = Decimal.Parse(balance) / new Decimal(Math.Pow(10, int.Parse(decimals)));
                         string fmt = "{0:N" + decimals + "}";
-                        result = new JObject() { { "balance", string.Format(fmt, value) }, { "name", symbol } };
+                        result = JObject.Parse(string.Format(fmt, value));
                     }
                 }
                 else if (json.ContainsKey("error"))
                 {
-                    MyJson.JsonNode_Object json_error_obj = json["error"] as MyJson.JsonNode_Object;
-                    result = new JObject() { { "error", json_error_obj.ToString() } };
+                    JObject json_error_obj = json["error"] as JObject;
+                    result = JObject.Parse(json_error_obj.ToString());
                 }
             }
             catch (Exception e) {
                 throw e;
             }            
             return result;
+        }
+
+        static string GetJsonValue(JObject item)
+        {
+            var type = item["type"].ToString();
+            var value = item["value"];
+            if (type == "ByteArray")
+            {
+                var bt = HexString2Bytes(value.ToString());
+                var num = new BigInteger(bt);
+                return num.ToString();
+
+            }
+            else if (type == "Integer")
+            {
+                return value.ToString();
+
+            }
+            return "";
+        }
+
+        static byte[] HexString2Bytes(string str)
+        {
+            if (str.IndexOf("0x") == 0)
+                str = str.Substring(2);
+            byte[] outd = new byte[str.Length / 2];
+            for (var i = 0; i < str.Length / 2; i++)
+            {
+                outd[i] = byte.Parse(str.Substring(i * 2, 2), System.Globalization.NumberStyles.HexNumber);
+            }
+            return outd;
         }
     }
 }

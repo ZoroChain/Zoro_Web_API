@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Globalization;
+using System.Text;
 
 namespace NEO_Block_API.Controllers
 {
@@ -103,35 +104,51 @@ namespace NEO_Block_API.Controllers
                     #endregion
                     #region 获取block from hash
                     case "getblockfromhash":
-						result = msq.GetBlockFromHash(req);
-						break;
+                        result = msq.GetBlockFromHash(req);
+                        break;
                     case "getappchainblockfromhash":
                         result = msq.GetAppChainBlockFromHash(req);
                         break;
                     #endregion
                     #region 获取blockcount
                     case "getblockcount":
-                        result = msq.GetBlockCount(req);
+                        var blockcount = Helper.MakeRpcUrl(ZoroHelper.ZoroUrl, "getblockcount", "0000000000000000000000000000000000000000");
+                        var s = await Helper.HttpGet(blockcount);
+                        var a = new JArray();
+                        a.Add(new JObject { { "blockcount", JObject.Parse(s)["result"].ToString() } });
+                        result = a;
                         break;
                     case "getappchainblockcount":
-						result = msq.GetAppchainBlockCount(req);
-						break;
+                        var appchainblockcount = Helper.MakeRpcUrl(ZoroHelper.ZoroUrl, "getblockcount", req.@params[0].ToString());
+                        var apps = await Helper.HttpGet(appchainblockcount);
+                        var appa = new JArray();
+                        appa.Add(new JObject { { "blockcount", JObject.Parse(apps)["result"].ToString() } });
+                        result = appa;
+                        break;
+                    #endregion
+                    #region 获取爬虫爬到的blockcount
+                    case "getdatablockheight":
+                        result = msq.GetBlockCount(req);
+                        break;
+                    case "getappchaindatablockheight":
+                        result = msq.GetAppchainBlockCount(req);
+                        break;
                     #endregion
                     #region 获取addrcount
                     case "getaddrcount":
                         result = msq.GetAddrCount(req);
                         break;
                     case "getappchainaddrcount":
-						result = msq.GetAppchainAddrCount(req);
-						break;
+                        result = msq.GetAppchainAddrCount(req);
+                        break;
                     #endregion
                     #region 获取txcount
                     case "gettxcount":
                         result = msq.GetTxCount(req);
                         break;
                     case "getappchaintxcount":
-						result = msq.GetAppchainTxCount(req);
-						break;
+                        result = msq.GetAppchainTxCount(req);
+                        break;
                     #endregion
                     #region 获取rawtransaction
                     case "getrawtransaction":
@@ -146,8 +163,8 @@ namespace NEO_Block_API.Controllers
                         result = msq.GetRawTransactions(req);
                         break;
                     case "getappchainrawtransactions":
-						result = msq.GetAppchainRawTransactions(req);
-						break;
+                        result = msq.GetAppchainRawTransactions(req);
+                        break;
                     case "getrawtransactionsdesc":
                         result = msq.GetRawTransactionsDESC(req);
                         break;
@@ -165,25 +182,25 @@ namespace NEO_Block_API.Controllers
                     #endregion
                     #region 获取hashlist,appchain
                     case "gethashlist":
-						result = msq.GetHashlist(req);
-						break;
-					case "getallappchains":
-						result = msq.GetAllAppchains(req);
-						break;
-					case "getappchain":
-						result = msq.GetAppchain(req);
-						break;
+                        result = msq.GetHashlist(req);
+                        break;
+                    case "getallappchains":
+                        result = msq.GetAllAppchains(req);
+                        break;
+                    case "getappchain":
+                        result = msq.GetAppchain(req);
+                        break;
                     #endregion
                     #region 获取nep5asset
                     case "getnep5asset":
-						result = msq.GetNep5Asset(req);
-						break;
+                        result = msq.GetNep5Asset(req);
+                        break;
                     case "getappchainnep5asset":
                         result = msq.GetAppChainNep5Asset(req);
                         break;
                     #endregion
                     #region 获取address
-                    case "getaddress":                    
+                    case "getaddress":
                         result = msq.GetAddress(req);
                         break;
                     case "getappchainaddress":
@@ -192,32 +209,32 @@ namespace NEO_Block_API.Controllers
                     #endregion
                     #region 获取addr
                     case "getaddr":
-						result = msq.GetAddr(req);
-						break;
+                        result = msq.GetAddr(req);
+                        break;
                     case "getappchainaddr":
                         result = msq.GetAppChainAddr(req);
                         break;
                     #endregion
                     #region 获取addrs
                     case "getaddrs":
-						result = msq.GetAddrs(req);
-						break;
+                        result = msq.GetAddrs(req);
+                        break;
                     case "getappchainaddrs":
                         result = msq.GetAppChainAddrs(req);
                         break;
                     #endregion
                     #region 获取addresstxs
-                    case "getaddresstxs":		
-						result = msq.GetAddressTxs(req);
-						break;
+                    case "getaddresstxs":
+                        result = msq.GetAddressTxs(req);
+                        break;
                     case "getappchainaddresstxs":
                         result = msq.GetAppChainAddressTxs(req);
                         break;
                     #endregion
                     #region 获取balance
                     case "getbalance":
-						result = await msq.GetBalanceAsync(req);
-						break;
+                        result = await msq.GetBalanceAsync(req);
+                        break;
                     case "getappchainbalance":
                         result = await msq.GetAppChainBalanceAsync(req);
                         break;
@@ -256,99 +273,172 @@ namespace NEO_Block_API.Controllers
                     #endregion
                     #region 获取nep5transfer
                     case "getnep5transfer":
-						result = msq.GetNep5Transfer(req);
-						break;
+                        result = msq.GetNep5Transfer(req);
+                        break;
                     case "getappchainnep5transfer":
                         result = msq.GetAppChainNep5Transfer(req);
                         break;
                     #endregion
                     case "getnep5count":
-						result = msq.GetNep5Count(req);
-						break;
-					case "getnep5transfersbyasset":
-						result = msq.GetNep5TransfersByAsset(req);
-						break;					
-					case "getnep5allnep5assetofaddress":
-						result = msq.GetAllNep5AssetOfAddress(req);
-						break;								                   
+                        result = msq.GetNep5Count(req);
+                        break;
+                    case "getnep5transfersbyasset":
+                        result = msq.GetNep5TransfersByAsset(req);
+                        break;
+                    case "getnep5allnep5assetofaddress":
+                        result = msq.GetAllNep5AssetOfAddress(req);
+                        break;
+                    case "sendrawtransaction":
+                        var tx = "";
+                        if (req.@params.Length > 1)
+                        {
+                            byte[] postArray = APIHelper.HexString2Bytes(req.@params[1].ToString());
+                            tx = await ZoroHelper.InvokeScript(postArray, req.@params[0].ToString());
+                        }
+                        else
+                        {
+                            byte[] postArray = APIHelper.HexString2Bytes(req.@params[0].ToString());
+                            tx = await ZoroHelper.InvokeScript(postArray, "0000000000000000000000000000000000000000");
+                        }
+                        result = new JArray() { JObject.Parse(tx)["result"] };
+                        break;
+                    case "invokescript":
+                        var invokescript = "";
+                        if (req.@params.Length > 1)
+                        {
+                            byte[] postArray = APIHelper.HexString2Bytes(req.@params[1].ToString());
+                            invokescript = await ZoroHelper.InvokeScript(postArray, req.@params[0].ToString());
+                        }
+                        else
+                        {
+                            byte[] postArray = APIHelper.HexString2Bytes(req.@params[0].ToString());
+                            invokescript = await ZoroHelper.InvokeScript(postArray, "0000000000000000000000000000000000000000");
+                        }
+                        result = new JArray() { JObject.Parse(invokescript)["result"] };
+                        break;
+                    case "getcontractstate":
+                        var url = "";
+                        if (req.@params.Length > 1)
+                        {
+                            byte[] postArray = null;
+                            JArray jArray = new JArray();
+                            jArray.Add(req.@params[0].ToString());
+                            jArray.Add(req.@params[1].ToString());
+                            url = Helper.MakeRpcUrlPost(ZoroHelper.ZoroUrl, "getcontractstate", out postArray, jArray);
+                            url = await Helper.HttpPost(url, postArray);
+                        }
+                        else
+                        {
+                            byte[] postArray = null;
+                            JArray jArray = new JArray();
+                            jArray.Add("0000000000000000000000000000000000000000");
+                            jArray.Add(req.@params[0].ToString());
+                            url = Helper.MakeRpcUrlPost(ZoroHelper.ZoroUrl, "getcontractstate", out postArray, jArray);
+                            url = await Helper.HttpPost(url, postArray);
+                        }
+                        result = new JArray() { JObject.Parse(url)["result"] };
+                        break;
                     case "getallnep5assetofaddress":
                         string NEP5addr = (string)req.@params[0];
                         bool isNeedBalance = false;
+                        string chainHash = "";
                         if (req.@params.Count() > 1)
                         {
                             isNeedBalance = ((Int64)req.@params[1] == 1) ? true : false;
                         }
-                        
-                        //按资产汇集收到的钱(仅资产ID)
-                        string findTransferTo = "{ to:'" + NEP5addr + "'}";
-                        JArray transferToJA = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5transfer", findTransferTo);
-                        List<NEP5.Transfer> tfts = new List<NEP5.Transfer>();
-                        foreach (JObject tfJ in transferToJA)
-                        {
-                            tfts.Add(new NEP5.Transfer(tfJ));
+                        if (req.@params.Count() > 2) {
+                            chainHash = req.@params[2].ToString();
                         }
-                        var queryTo = from tft in tfts
-                                    group tft by tft.asset into tftG
-                                    select new { assetid = tftG.Key};
-                        var assetAdds = queryTo.ToList();
 
-                        //如果需要余额，则通过cli RPC批量获取余额
+                        var assetAdds = msq.GetNep5AssetByAddress(chainHash, NEP5addr);
                         List<NEP5.AssetBalanceOfAddr> addrAssetBalances = new List<NEP5.AssetBalanceOfAddr>();
                         if (isNeedBalance) {
-                            List<NEP5.AssetBalanceOfAddr> addrAssetBalancesTemp = new List<NEP5.AssetBalanceOfAddr>();
-                            foreach (var assetAdd in assetAdds)
-                            {
-                                string findNep5Asset = "{assetid:'" + assetAdd.assetid + "'}";
-                                JArray Nep5AssetJA = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5asset", findNep5Asset);
-                                string Symbol = (string)Nep5AssetJA[0]["symbol"];
-                                string resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'getcontractstate','params':['" + assetAdd.assetid + "'],'id':1}", System.Text.Encoding.UTF8, 1);
-                                JObject resultJ = (JObject)JObject.Parse(resp)["result"];
-                                if (resultJ == null)
-                                    continue;
-
-                                addrAssetBalancesTemp.Add(new NEP5.AssetBalanceOfAddr(assetAdd.assetid, Symbol, string.Empty));
-                            }
-
-                            List<string> nep5Hashs = new List<string>();
-                            JArray queryParams = new JArray();
-                            byte[] NEP5allAssetOfAddrHash = ThinNeo.Helper.GetPublicKeyHashFromAddress(NEP5addr);
-                            string NEP5allAssetOfAddrHashHex = ThinNeo.Helper.Bytes2HexString(NEP5allAssetOfAddrHash.Reverse().ToArray());
-                            foreach (var abt in addrAssetBalancesTemp)
-                            {
-                                nep5Hashs.Add(abt.assetid);
-                                queryParams.Add(JArray.Parse("['(str)balanceOf',['(hex)" + NEP5allAssetOfAddrHashHex + "']]"));                               
-                            }
-                            JArray NEP5allAssetBalanceJA = (JArray)ct.callContractForTest(neoCliJsonRPCUrl, nep5Hashs, queryParams)["stack"];
-                            var a = Newtonsoft.Json.JsonConvert.SerializeObject(NEP5allAssetBalanceJA);
-                            foreach (var abt in addrAssetBalancesTemp)
-                            {
-                                /// ChangeLog:
-                                /// 升级智能合约带来的数据结构不一致问题，暂时使用try方式临时解决
-                                try
+                            foreach (var assetAdd in assetAdds) {
+                                if (assetAdd["type"].ToString() == "NativeNep5")
                                 {
-                                    string allBalanceStr = (string)NEP5allAssetBalanceJA[addrAssetBalancesTemp.IndexOf(abt)]["value"];
-                                    string allBalanceType = (string)NEP5allAssetBalanceJA[addrAssetBalancesTemp.IndexOf(abt)]["type"];
-
-                                    //获取NEP5资产信息，获取精度
-                                    NEP5.Asset NEP5asset = new NEP5.Asset(mongodbConnStr, mongodbDatabase, abt.assetid);
-
-                                    abt.balance = NEP5.getNumStrFromStr(allBalanceType, allBalanceStr, NEP5asset.decimals);
-                                } catch (Exception e)
-                                {
-                                    Console.WriteLine(abt.assetid +",ConvertTypeFailed,errMsg:"+e.Message);
-                                    abt.balance = string.Empty;
+                                    var nep5 = await APIHelper.getNativeBalanceFromAddressAsync(assetAdd["assetid"].ToString(), NEP5addr, chainHash);
+                                    if (nep5.balance != "0")
+                                        addrAssetBalances.Add(nep5);
                                 }
-                            }
-
-                            //去除余额为0的资产
-                            foreach (var abt in addrAssetBalancesTemp)
-                            {
-                                if (abt.balance != string.Empty && abt.balance != "0")
+                                else
                                 {
-                                    addrAssetBalances.Add(abt);
+                                    var nep5 = await APIHelper.getBalanceFromAddressAsync(assetAdd["assetid"].ToString(), NEP5addr, chainHash);
+                                    if (nep5.balance != "0")
+                                        addrAssetBalances.Add(nep5);
                                 }
                             }
                         }
+
+
+                        ////按资产汇集收到的钱(仅资产ID)
+                        //JArray transferToJA = msq.GetNep5TranferFromToAddress(chainHash, NEP5addr);
+                        //List<NEP5.Transfer> tfts = new List<NEP5.Transfer>();
+                        //foreach (JObject tfJ in transferToJA)
+                        //{
+                        //    tfts.Add(new NEP5.Transfer(tfJ));
+                        //}
+                        //var queryTo = from tft in tfts
+                        //            group tft by tft.asset into tftG
+                        //            select new { assetid = tftG.Key};
+                        //var assetAdds = queryTo.ToList();
+
+                        ////如果需要余额，则通过cli RPC批量获取余额
+                        ////List<NEP5.AssetBalanceOfAddr> addrAssetBalances = new List<NEP5.AssetBalanceOfAddr>();
+                        //if (isNeedBalance) {
+                        //    List<NEP5.AssetBalanceOfAddr> addrAssetBalancesTemp = new List<NEP5.AssetBalanceOfAddr>();
+                        //    foreach (var assetAdd in assetAdds)
+                        //    {
+                        //        string findNep5Asset = "{assetid:'" + assetAdd.assetid + "'}";
+                        //        JArray Nep5AssetJA = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5asset", findNep5Asset);
+                        //        string Symbol = (string)Nep5AssetJA[0]["symbol"];
+                        //        string resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'getcontractstate','params':['" + assetAdd.assetid + "'],'id':1}", System.Text.Encoding.UTF8, 1);
+                        //        JObject resultJ = (JObject)JObject.Parse(resp)["result"];
+                        //        if (resultJ == null)
+                        //            continue;
+
+                        //        addrAssetBalancesTemp.Add(new NEP5.AssetBalanceOfAddr(assetAdd.assetid, Symbol, string.Empty));
+                        //    }
+
+                        //    List<string> nep5Hashs = new List<string>();
+                        //    JArray queryParams = new JArray();
+                        //    byte[] NEP5allAssetOfAddrHash = ThinNeo.Helper.GetPublicKeyHashFromAddress(NEP5addr);
+                        //    string NEP5allAssetOfAddrHashHex = ThinNeo.Helper.Bytes2HexString(NEP5allAssetOfAddrHash.Reverse().ToArray());
+                        //    foreach (var abt in addrAssetBalancesTemp)
+                        //    {
+                        //        nep5Hashs.Add(abt.assetid);
+                        //        queryParams.Add(JArray.Parse("['(str)balanceOf',['(hex)" + NEP5allAssetOfAddrHashHex + "']]"));                               
+                        //    }
+                        //    JArray NEP5allAssetBalanceJA = (JArray)ct.callContractForTest(neoCliJsonRPCUrl, nep5Hashs, queryParams)["stack"];
+                        //    var a = Newtonsoft.Json.JsonConvert.SerializeObject(NEP5allAssetBalanceJA);
+                        //    foreach (var abt in addrAssetBalancesTemp)
+                        //    {
+                        //        /// ChangeLog:
+                        //        /// 升级智能合约带来的数据结构不一致问题，暂时使用try方式临时解决
+                        //        try
+                        //        {
+                        //            string allBalanceStr = (string)NEP5allAssetBalanceJA[addrAssetBalancesTemp.IndexOf(abt)]["value"];
+                        //            string allBalanceType = (string)NEP5allAssetBalanceJA[addrAssetBalancesTemp.IndexOf(abt)]["type"];
+
+                        //            //获取NEP5资产信息，获取精度
+                        //            NEP5.Asset NEP5asset = new NEP5.Asset(mongodbConnStr, mongodbDatabase, abt.assetid);
+
+                        //            abt.balance = NEP5.getNumStrFromStr(allBalanceType, allBalanceStr, NEP5asset.decimals);
+                        //        } catch (Exception e)
+                        //        {
+                        //            Console.WriteLine(abt.assetid +",ConvertTypeFailed,errMsg:"+e.Message);
+                        //            abt.balance = string.Empty;
+                        //        }
+                        //    }
+
+                        //    //去除余额为0的资产
+                        //    foreach (var abt in addrAssetBalancesTemp)
+                        //    {
+                        //        if (abt.balance != string.Empty && abt.balance != "0")
+                        //        {
+                        //            addrAssetBalances.Add(abt);
+                        //        }
+                        //    }
+                        //}
 
                         ////按资产汇集支出的钱
                         //string findTransferFrom = "{ from:'" + NEP5addr + "'}";
