@@ -176,6 +176,31 @@ namespace NEO_Block_API
             return outd;
         }
 
+        public static async Task<string> SendRawTransaction(byte[] script, string chainHash)
+        {
+            string scriptPublish = script.ToHexString();
+
+            byte[] postdata;
+            string url;
+            JArray postArray = new JArray();
+            postArray.Add(chainHash);
+            postArray.Add(scriptPublish);
+
+            url = Helper.MakeRpcUrlPost(ZoroUrl, "sendrawtransaction", out postdata, postArray);
+
+            string result = "";
+            try
+            {
+                result = await Helper.HttpPost(url, postdata);
+
+            }
+            catch (Exception)
+            {
+            }
+
+            return result;
+        }
+
         public static async Task<string> InvokeScript(byte[] script, string chainHash)
         {
             string scriptPublish = script.ToHexString();

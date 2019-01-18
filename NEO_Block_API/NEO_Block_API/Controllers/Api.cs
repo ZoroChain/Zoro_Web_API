@@ -293,14 +293,17 @@ namespace NEO_Block_API.Controllers
                         if (req.@params.Length > 1)
                         {
                             byte[] postArray = APIHelper.HexString2Bytes(req.@params[1].ToString());
-                            tx = await ZoroHelper.InvokeScript(postArray, req.@params[0].ToString());
+                            tx = await ZoroHelper.SendRawTransaction(postArray, req.@params[0].ToString());
                         }
                         else
                         {
                             byte[] postArray = APIHelper.HexString2Bytes(req.@params[0].ToString());
-                            tx = await ZoroHelper.InvokeScript(postArray, "0000000000000000000000000000000000000000");
+                            tx = await ZoroHelper.SendRawTransaction(postArray, "0000000000000000000000000000000000000000");
                         }
-                        result = new JArray() { JObject.Parse(tx)["result"] };
+                        if (JObject.Parse(tx)["result"].ToString() == "True") 
+                            result = new JArray() { new JObject { { "rawtransaction", JObject.Parse(tx)["result"] } } };
+                        else
+                            result = new JArray() { JObject.Parse(tx)["result"] };
                         break;
                     case "invokescript":
                         var invokescript = "";
