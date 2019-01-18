@@ -301,7 +301,7 @@ namespace NEO_Block_API.Controllers
                             tx = await ZoroHelper.SendRawTransaction(postArray, "0000000000000000000000000000000000000000");
                         }
                         if (JObject.Parse(tx)["result"].ToString() == "True") 
-                            result = new JArray() { new JObject { { "rawtransaction", JObject.Parse(tx)["result"] } } };
+                            result = new JArray() { new JObject { { "sendrawtransactionresult", JObject.Parse(tx)["result"] } } };
                         else
                             result = new JArray() { JObject.Parse(tx)["result"] };
                         break;
