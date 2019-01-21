@@ -1700,7 +1700,12 @@ namespace NEO_Block_API.lib
 			{
 				conn.Open();
 
-				string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_0000000000000000000000000000000000000000 where txid = '" + req.@params[0] + "'";
+                string txid = req.@params[0].ToString();
+                if (!txid.StartsWith("0x")) {
+                    txid = "0x" + txid;
+                }
+
+                string select = "select a.txid as txid, a.size as size, a.type as type, a.version as version, a.blockheight as blockheight, b.gas_consumed as sys_fee from tx_0000000000000000000000000000000000000000 as a, notify_0000000000000000000000000000000000000000 as b where a.txid = '" + txid + "' and a.txid=b.txid";
 
 				MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1730,9 +1735,15 @@ namespace NEO_Block_API.lib
 			{
 				conn.Open();
 
-				string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_" + req.@params[0] +" where txid = '" + req.@params[1] + "'";
+                string txid = req.@params[1].ToString();
+                if (!txid.StartsWith("0x"))
+                {
+                    txid = "0x" + txid;
+                }
 
-				MySqlCommand cmd = new MySqlCommand(select, conn);
+                string select = "select a.txid as txid, a.size as size, a.type as type, a.version as version, a.blockheight as blockheight, b.gas_consumed as sys_fee from tx_" + req.@params[0] + " as a, notify_" + req.@params[0] + " as b where a.txid = '" + txid + "' and a.txid=b.txid";
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
 
 				JsonPRCresponse res = new JsonPRCresponse();
 
