@@ -282,9 +282,6 @@ namespace NEO_Block_API.Controllers
                     case "getnep5count":
                         result = msq.GetNep5Count(req);
                         break;
-                    case "getnep5transfersbyasset":
-                        result = msq.GetNep5TransfersByAsset(req);
-                        break;
                     case "getnep5allnep5assetofaddress":
                         result = msq.GetAllNep5AssetOfAddress(req);
                         break;

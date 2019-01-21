@@ -1336,55 +1336,36 @@ namespace NEO_Block_API.lib
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 conn.Open();
+
                 string select = "";
                 if (chainHash == "")
-                    select = "select blockindex, txid, n , asset , fromx , tox , value from nep5transfer_0000000000000000000000000000000000000000 where tox = @to";
+                {
+                    select = "select  a.id as id, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals from nep5transfer_0000000000000000000000000000000000000000 as a, nep5asset_0000000000000000000000000000000000000000 as b where a.tox = '" + toAddress + "' and a.asset=b.assetid";
+                }
                 else
-                    select = "select blockindex, txid, n , asset , fromx , tox , value from nep5transfer_" + chainHash + " where tox = @to";          
+                {
+                    select = "select  a.id as id, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals from nep5transfer_" + chainHash + " as a, nep5asset_" + chainHash + " as b where a.tox = '" + toAddress + "' and a.asset=b.assetid";
+                }               
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
-                cmd.Parameters.AddWithValue("@to", toAddress);
+
+
 
                 JsonPRCresponse res = new JsonPRCresponse();
 
                 MySqlDataReader rdr = cmd.ExecuteReader();
+                JArray bk = new JArray();
                 while (rdr.Read())
                 {
-                    var bdata = (rdr["blockindex"]).ToString();
-                    var txid = (rdr["txid"]).ToString();
-                    var ndata = (rdr["n"]).ToString();
+                    var decimals = int.Parse(rdr["decimals"].ToString());
+                    var idata = (rdr["id"]).ToString();
                     var adata = (rdr["asset"]).ToString();
                     var fdata = (rdr["fromx"]).ToString();
                     var tdata = (rdr["tox"]).ToString();
                     var vdata = (rdr["value"]).ToString();
+                    vdata = (ulong.Parse(vdata) / Math.Pow(10, decimals)).ToString();
 
-                    JArray bk = new JArray {
-                    new JObject     {
-                                        { "txid", txid} 
-                                     },
-                    new JObject    {
-                                        {"blockindex",bdata}
-                                   },
-                    new JObject    {
-                                        {"n",ndata}
-                                   },
-                    new JObject    {
-                                        {"asset",adata}
-                                   },
-                    new JObject    {
-                                        {"from",fdata}
-                                   },
-                    new JObject    {
-                                        {"to",tdata}
-                                   },
-                    new JObject    {
-                                        {"value",vdata}
-                                   },
-
-
-                               };
-
-                    res.result = bk;
+                    bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata } });
                 }
 
                 return res.result;
@@ -1397,53 +1378,30 @@ namespace NEO_Block_API.lib
 			{
 
 				conn.Open();
-				var txid = req.@params[0].ToString();
+                string select = "select  a.id as id, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals from nep5transfer_0000000000000000000000000000000000000000 as a, nep5asset_0000000000000000000000000000000000000000 as b where a.asset=b.assetid";
 
-				string select = "select blockindex, n , asset , fromx , tox , value from nep5transfer_0000000000000000000000000000000000000000 where txid = @txid";
-
-				MySqlCommand cmd = new MySqlCommand(select, conn);
-				cmd.Parameters.AddWithValue("@txid", txid);
+                MySqlCommand cmd = new MySqlCommand(select, conn);
 
 
-				JsonPRCresponse res = new JsonPRCresponse();
 
-				MySqlDataReader rdr = cmd.ExecuteReader();
-				while (rdr.Read())
-				{
-					var bdata = (rdr["blockindex"]).ToString();
-					var ndata = (rdr["n"]).ToString();
-					var adata = (rdr["asset"]).ToString();
-					var fdata = (rdr["fromx"]).ToString();
-					var tdata = (rdr["tox"]).ToString();
-					var vdata = (rdr["value"]).ToString();
+                JsonPRCresponse res = new JsonPRCresponse();
 
-					JArray bk = new JArray {
-					new JObject    {
-										{"blockindex",bdata}
-								   },
-					new JObject    {
-										{"n",ndata}
-								   },
-					new JObject    {
-										{"asset",adata}
-								   },
-					new JObject    {
-										{"from",fdata}
-								   },
-					new JObject    {
-										{"to",tdata}
-								   },
-					new JObject    {
-										{"value",vdata}
-								   },
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                JArray bk = new JArray();
+                while (rdr.Read())
+                {
+                    var decimals = int.Parse(rdr["decimals"].ToString());
+                    var idata = (rdr["id"]).ToString();
+                    var adata = (rdr["asset"]).ToString();
+                    var fdata = (rdr["fromx"]).ToString();
+                    var tdata = (rdr["tox"]).ToString();
+                    var vdata = (rdr["value"]).ToString();
+                    vdata = (ulong.Parse(vdata) / Math.Pow(10, decimals)).ToString();
 
+                    bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata } });
+                }
 
-							   };
-
-					res.result = bk;
-				}
-
-				return res.result;
+                return res.result;
 
 			}
 		}
@@ -1454,100 +1412,40 @@ namespace NEO_Block_API.lib
             {
 
                 conn.Open();
-                var txid = req.@params[1].ToString();
+                string txid = req.@params[1].ToString();
+                if (!txid.StartsWith("0x"))
+                {
+                    txid = "0x" + txid;
+                }
 
-                string select = "select blockindex, n , asset , fromx , tox , value from nep5transfer_" + req.@params[0] + " where txid = @txid";
+                string select = "select  a.id as id, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals from nep5transfer_" + req.@params[0] + " as a, nep5asset_" + req.@params[0] + " as b where a.asset=b.assetid";
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
-                cmd.Parameters.AddWithValue("@txid", txid);
+
 
 
                 JsonPRCresponse res = new JsonPRCresponse();
 
                 MySqlDataReader rdr = cmd.ExecuteReader();
+                JArray bk = new JArray();
                 while (rdr.Read())
                 {
-                    var bdata = (rdr["blockindex"]).ToString();
-                    var ndata = (rdr["n"]).ToString();
+                    var decimals = int.Parse(rdr["decimals"].ToString());
+                    var idata = (rdr["id"]).ToString();
                     var adata = (rdr["asset"]).ToString();
                     var fdata = (rdr["fromx"]).ToString();
                     var tdata = (rdr["tox"]).ToString();
                     var vdata = (rdr["value"]).ToString();
+                    vdata = (ulong.Parse(vdata) / Math.Pow(10, decimals)).ToString();
 
-                    JArray bk = new JArray {
-                    new JObject    {
-                                        {"blockindex",bdata}
-                                   },
-                    new JObject    {
-                                        {"n",ndata}
-                                   },
-                    new JObject    {
-                                        {"asset",adata}
-                                   },
-                    new JObject    {
-                                        {"from",fdata}
-                                   },
-                    new JObject    {
-                                        {"to",tdata}
-                                   },
-                    new JObject    {
-                                        {"value",vdata}
-                                   },
-
-
-                               };
-
-                    res.result = bk;
+                    bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata } });
                 }
 
-                return res.result;
+                return res.result = bk;
 
             }
         }
 
-
-        public JArray GetNep5TransfersByAsset(JsonRPCrequest req)
-		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
-			{
-
-				conn.Open();
-		
-
-				string select = "select  asset , blockindex, from , n , to ,txid , value from nep5transfer  where indexx='" + req.@params[0] + "'";
-
-				MySqlCommand cmd = new MySqlCommand(select, conn);
-				
-
-				JsonPRCresponse res = new JsonPRCresponse();
-
-		
-				MySqlDataReader rdr = cmd.ExecuteReader();
-
-				JArray bk = new JArray();
-				while (rdr.Read())
-				{
-			
-				
-					var adata = (rdr["asset"]).ToString();
-					var bi = (rdr["blockindex"]).ToString();
-					var fdata = (rdr["from"]).ToString();
-					var n = (rdr["n"]).ToString();
-					var tdata = (rdr["to"]).ToString();
-					var tx = (rdr["txid"]).ToString();
-					var vdata = (rdr["value"]).ToString();
-					
-
-
-					bk.Add(new JObject { { "blockindex", bi }, { "txid", tx }, { "n", n },{ "asset", adata },{ "from", fdata }, { "to", tdata }, { "value", vdata } });
-
-
-			}
-
-				return res.result = bk;
-
-			}
-		}
 
 		public JArray GetNep5TransferByTxid(JsonRPCrequest req)
 		{
@@ -1555,9 +1453,14 @@ namespace NEO_Block_API.lib
 			{
 
 				conn.Open();
-		
 
-				string select = "select  id , asset , fromx , tox , value from nep5transfer_0000000000000000000000000000000000000000 where txid = '" + req.@params[0]+ "'";
+                string txid = req.@params[0].ToString();
+                if (!txid.StartsWith("0x"))
+                {
+                    txid = "0x" + txid;
+                }
+
+                string select = "select  a.id as id, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals from nep5transfer_0000000000000000000000000000000000000000 as a, nep5asset_0000000000000000000000000000000000000000 as b where a.txid = '" + txid + "' and a.asset=b.assetid";
 
 				MySqlCommand cmd = new MySqlCommand(select, conn); 
 			
@@ -1569,13 +1472,13 @@ namespace NEO_Block_API.lib
 				JArray bk = new JArray();
 				while (rdr.Read())
 				{
-
+                    var decimals = int.Parse(rdr["decimals"].ToString());
 					var idata = (rdr["id"]).ToString();
 					var adata = (rdr["asset"]).ToString();
 					var fdata = (rdr["fromx"]).ToString();
 					var tdata = (rdr["tox"]).ToString();
 					var vdata = (rdr["value"]).ToString();
-
+                    vdata = (ulong.Parse(vdata) / Math.Pow(10, decimals)).ToString();
 
 					bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata } , { "value", vdata } });
 				}
@@ -1592,8 +1495,13 @@ namespace NEO_Block_API.lib
 
                 conn.Open();
 
+                string txid = req.@params[1].ToString();
+                if (!txid.StartsWith("0x"))
+                {
+                    txid = "0x" + txid;
+                }
 
-                string select = "select  id , asset , fromx , tox , value from nep5transfer_" + req.@params[0] + " where txid = '" + req.@params[1] + "'";
+                string select = "select  a.id as id, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals from nep5transfer_" + req.@params[0] + " as a, nep5asset_" + req.@params[0] + " as b where a.txid = '" + txid + "' and a.asset=b.assetid";
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1605,13 +1513,13 @@ namespace NEO_Block_API.lib
                 JArray bk = new JArray();
                 while (rdr.Read())
                 {
-
+                    var decimals = int.Parse(rdr["decimals"].ToString());
                     var idata = (rdr["id"]).ToString();
                     var adata = (rdr["asset"]).ToString();
                     var fdata = (rdr["fromx"]).ToString();
                     var tdata = (rdr["tox"]).ToString();
                     var vdata = (rdr["value"]).ToString();
-
+                    vdata = (ulong.Parse(vdata) / Math.Pow(10, decimals)).ToString();
 
                     bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata } });
                 }
