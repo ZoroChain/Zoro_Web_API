@@ -1700,7 +1700,7 @@ namespace NEO_Block_API.lib
 			{
 				conn.Open();
 
-				string select = "select txid ,size, type ,version, blockheight, sys_fee, net_fee from tx_0000000000000000000000000000000000000000 where txid = '" + req.@params[0] + "'";
+				string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_0000000000000000000000000000000000000000 where txid = '" + req.@params[0] + "'";
 
 				MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1715,10 +1715,9 @@ namespace NEO_Block_API.lib
 					var tp = (rdr["type"]).ToString();
 					var vs = (rdr["version"]).ToString();
 					var bh = (rdr["blockheight"]).ToString();
-					var sf = (rdr["sys_fee"]).ToString();
-					var nf = (rdr["net_fee"]).ToString();				
+					var sf = (rdr["sys_fee"]).ToString();			
 				
-					bk.Add(new JObject {{ "txid", tx } , { "size", sz } , { "type", tp } , { "version", vs } , { "blockindex", bh } , { "sys_fee", sf }, { "net_fee", nf } });
+					bk.Add(new JObject {{ "txid", tx } , { "size", sz } , { "type", tp } , { "version", vs } , { "blockindex", bh } , { "sys_fee", sf }, { "net_fee", sf } });
 				}
 				return res.result = bk;
 			}
@@ -1731,7 +1730,7 @@ namespace NEO_Block_API.lib
 			{
 				conn.Open();
 
-				string select = "select txid ,size, type ,version, blockheight, sys_fee, net_fee from tx_" + req.@params[0] +" where txid = '" + req.@params[1] + "'";
+				string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_" + req.@params[0] +" where txid = '" + req.@params[1] + "'";
 
 				MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1747,9 +1746,8 @@ namespace NEO_Block_API.lib
 					var vs = (rdr["version"]).ToString();
 					var bh = (rdr["blockheight"]).ToString();
 					var sf = (rdr["sys_fee"]).ToString();
-					var nf = (rdr["net_fee"]).ToString();
 
-					bk.Add(new JObject { { "txid", tx }, { "size", sz }, { "type", tp }, { "version", vs }, { "blockindex", bh }, { "sys_fee", sf }, { "net_fee", nf } });
+					bk.Add(new JObject { { "txid", tx }, { "size", sz }, { "type", tp }, { "version", vs }, { "blockindex", bh }, { "sys_fee", sf }, { "net_fee", sf } });
 				}
 				return res.result = bk;
 			}
