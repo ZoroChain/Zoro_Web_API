@@ -28,9 +28,9 @@ namespace NEO_Block_API.lib
         {
             using (ScriptBuilder sb = new ScriptBuilder())
             {                
-                sb.EmitSysCall("Zoro.NativeNEP5.BalanceOf", UInt256.Parse(assetid), ZoroHelper.GetPublicKeyHashFromAddress(address));
-                sb.EmitSysCall("Zoro.NativeNEP5.Decimals", UInt256.Parse(assetid));
-                sb.EmitSysCall("Zoro.NativeNEP5.Symbol", UInt256.Parse(assetid));
+                sb.EmitSysCall("Zoro.NativeNEP5.Call", "BalanceOf", UInt160.Parse(assetid), ZoroHelper.GetPublicKeyHashFromAddress(address));
+                sb.EmitSysCall("Zoro.NativeNEP5.Call", "Decimals", UInt160.Parse(assetid));
+                sb.EmitSysCall("Zoro.NativeNEP5.Call", "Symbol", UInt160.Parse(assetid));
                 var info = await ZoroHelper.InvokeScript(sb.ToArray(), chainHash);
                 var value = GetBalanceFromJson(info);
                 return value;
@@ -53,10 +53,11 @@ namespace NEO_Block_API.lib
                     {
                         string balance = GetJsonValue(stack[0] as JObject);
                         string decimals = GetJsonValue(stack[1] as JObject);
+                        string symbol = GetJsonSymbol(stack[2] as JObject);
 
                         Decimal value = Decimal.Parse(balance) / new Decimal(Math.Pow(10, int.Parse(decimals)));
                         string fmt = "{0:N" + decimals + "}";
-                        result = JObject.Parse(string.Format(fmt, value));
+                        result = new JObject{ { "symbol",symbol },{ "balance", string.Format(fmt, value) } };
                     }
                 }
                 else if (json.ContainsKey("error"))
@@ -86,6 +87,18 @@ namespace NEO_Block_API.lib
             {
                 return value.ToString();
 
+            }
+            return "";
+        }
+
+        static string GetJsonSymbol(JObject item) {
+            var type = item["type"].ToString();
+            var value = item["value"];
+            if (type == "ByteArray")
+            {
+                var bt = HexString2Bytes(value.ToString());
+                var num = System.Text.Encoding.UTF8.GetString(bt);
+                return num.ToString();
             }
             return "";
         }

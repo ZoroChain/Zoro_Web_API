@@ -611,7 +611,7 @@ namespace NEO_Block_API.lib
 				conn.Open();
 
 
-				string select = "select asset from address_asset_0000000000000000000000000000000000000000 where addr='" + req.@params[0] + "'";
+				string select = "select asset, type from address_asset_0000000000000000000000000000000000000000 where addr='" + req.@params[0] + "'";
 
 				JsonPRCresponse res = new JsonPRCresponse();
 				MySqlCommand cmd = new MySqlCommand(select, conn);
@@ -622,12 +622,13 @@ namespace NEO_Block_API.lib
 				while (rdr.Read())
 				{
 					var asset = (rdr["asset"]).ToString();
+                    var type = rdr["type"].ToString();
                     var jObject = new JObject();
-                    if (asset.Length == 42) {
-                        jObject = await InvokeHelper.getBalanceOfAsync("0000000000000000000000000000000000000000", asset, req.@params[0].ToString());
+                    if (type == "NativeNep5") {                        
+                        jObject = await InvokeHelper.getNativeBalanceOfAsync("0000000000000000000000000000000000000000", asset, req.@params[0].ToString());
                     }
                     else {
-                        jObject = await InvokeHelper.getNativeBalanceOfAsync("0000000000000000000000000000000000000000", asset, req.@params[0].ToString());
+                        jObject = await InvokeHelper.getBalanceOfAsync("0000000000000000000000000000000000000000", asset, req.@params[0].ToString());
                     }
                     bk.Add(jObject);
 
@@ -644,34 +645,31 @@ namespace NEO_Block_API.lib
                 conn.Open();
 
 
-                string select = "select asset from address_asset_" + req.@params[0]+" where addr='" + req.@params[1] + "'";
+                string select = "select asset, type from address_asset_" + req.@params[0]+" where addr='" + req.@params[1] + "'";
 
                 JsonPRCresponse res = new JsonPRCresponse();
                 MySqlCommand cmd = new MySqlCommand(select, conn);
                 JArray bk = new JArray();
 
-                try
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                while (rdr.Read())
                 {
-                    MySqlDataReader rdr = cmd.ExecuteReader();
-                    while (rdr.Read())
+                    var asset = (rdr["asset"]).ToString();
+                    var type = rdr["type"].ToString();
+                    var jObject = new JObject();
+                    if (type == "NativeNep5")
                     {
-                        var asset = (rdr["asset"]).ToString();
-                        var jObject = new JObject();
-                        if (asset.Length == 42)
-                        {
-                            jObject = await InvokeHelper.getBalanceOfAsync(req.@params[0].ToString(), asset, req.@params[1].ToString());
-                        }
-                        else
-                        {
-                            jObject = await InvokeHelper.getNativeBalanceOfAsync(req.@params[0].ToString(), asset, req.@params[1].ToString());
-                        }
-                        bk.Add(jObject);
+                        jObject = await InvokeHelper.getNativeBalanceOfAsync("0000000000000000000000000000000000000000", asset, req.@params[0].ToString());
                     }
+                    else
+                    {
+                        jObject = await InvokeHelper.getBalanceOfAsync("0000000000000000000000000000000000000000", asset, req.@params[0].ToString());
+                    }
+                    bk.Add(jObject);
+
                 }
-                catch (Exception e) {
-                    throw e;
-                }
-                
+
 
                 return res.result = bk;
             }
