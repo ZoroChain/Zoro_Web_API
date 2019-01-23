@@ -1673,7 +1673,83 @@ namespace NEO_Block_API.lib
 
 		}
 
-		public JArray GetRawTransactions(JsonRPCrequest req)  // needs a sorting by txtype miner , reg or issue
+        public JArray GetTransaction(JsonRPCrequest req)  // needs a sorting by txtype miner , reg or issue
+        {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();
+
+                string txid = req.@params[0].ToString();
+                if (!txid.StartsWith("0x"))
+                {
+                    txid = "0x" + txid;
+                }
+
+                string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_0000000000000000000000000000000000000000 where txid='" + txid + "'";
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                JsonPRCresponse res = new JsonPRCresponse();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+                while (rdr.Read())
+                {
+                    var adata = (rdr["txid"]).ToString();
+                    var size = int.Parse((rdr["size"]).ToString());
+                    var type = (rdr["type"]).ToString();
+                    var vs = (rdr["version"]).ToString();
+                    var bdata = (rdr["blockheight"]).ToString();
+                    var sdata = int.Parse((rdr["sys_fee"]).ToString());
+
+                    bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
+                }
+                return res.result = bk;
+            }
+
+        }
+
+
+        public JArray GetAppChainTransaction(JsonRPCrequest req)  // needs a sorting by txtype miner , reg or issue
+        {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();
+
+                string txid = req.@params[1].ToString();
+                if (!txid.StartsWith("0x"))
+                {
+                    txid = "0x" + txid;
+                }
+
+                string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_" + req.@params[0] + " where txid='" + txid + "'";
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                JsonPRCresponse res = new JsonPRCresponse();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+                while (rdr.Read())
+                {
+
+                    var adata = (rdr["txid"]).ToString();
+                    var size = int.Parse((rdr["size"]).ToString());
+                    var type = (rdr["type"]).ToString();
+                    var vs = (rdr["version"]).ToString();
+                    var bdata = (rdr["blockheight"]).ToString();
+                    var sdata = int.Parse((rdr["sys_fee"]).ToString());
+
+                    bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
+                }
+                return res.result = bk;
+            }
+
+        }
+
+        public JArray GetRawTransactions(JsonRPCrequest req)  // needs a sorting by txtype miner , reg or issue
 		{
 			using (MySqlConnection conn = new MySqlConnection(conf))
 			{

@@ -158,6 +158,14 @@ namespace NEO_Block_API.Controllers
                         result = msq.GetAppChainRawTransaction(req);
                         break;
                     #endregion
+                    #region 获取transaction
+                    case "gettransaction":
+                        result = msq.GetTransaction(req);
+                        break;
+                    case "getactransaction":
+                        result = msq.GetAppChainTransaction(req);
+                        break;
+                    #endregion
                     #region 获取rawtransactions
                     case "getrawtransactions":
                         result = msq.GetRawTransactions(req);
