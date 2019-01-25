@@ -48,7 +48,7 @@ namespace NEO_Block_API
                 .UseStartup<Startup>()
                 .UseKestrel(options =>
                 {
-                    options.Listen(IPAddress.Loopback, getServerPort());
+                    options.Listen(IPAddress.Any, getServerPort());
                     //options.Listen(IPAddress.Loopback, 5001, listenOptions =>
                     //{
                     //    listenOptions.UseHttps("server.pfx", "linezero");
