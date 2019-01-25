@@ -1671,6 +1671,32 @@ namespace NEO_Block_API.lib
 
 		}
 
+        public string getGasConsumed(string txid, string chainhash) {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();
+
+                string select = "select gas_consumed from notify_" + chainhash + " where txid='" + txid + "'";
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                JsonPRCresponse res = new JsonPRCresponse();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+                var gasConsumed = "";
+                while (rdr.Read())
+                {
+                    gasConsumed = (rdr["gas_consumed"]).ToString();                   
+                }
+                if (gasConsumed == "") {
+                    return "0";
+                }
+                return gasConsumed;
+            }
+        }
+
         public JArray GetTransaction(JsonRPCrequest req)  // needs a sorting by txtype miner , reg or issue
         {
             using (MySqlConnection conn = new MySqlConnection(conf))
@@ -1682,8 +1708,8 @@ namespace NEO_Block_API.lib
                 {
                     txid = "0x" + txid;
                 }
-
-                string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_0000000000000000000000000000000000000000 where txid='" + txid + "'";
+                string gas = getGasConsumed(txid, "0000000000000000000000000000000000000000");
+                string select = "select txid, size, type, version, blockheight, gas_limit, gas_price from tx_0000000000000000000000000000000000000000 where txid='" + txid + "'";
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1699,9 +1725,17 @@ namespace NEO_Block_API.lib
                     var type = (rdr["type"]).ToString();
                     var vs = (rdr["version"]).ToString();
                     var bdata = (rdr["blockheight"]).ToString();
-                    var sdata = int.Parse((rdr["sys_fee"]).ToString());
+                    var sdata = gas;
+                    var gaslimit = (rdr["gas_limit"]).ToString();
+                    if (gaslimit == "") {
+                        gaslimit = "0";
+                    }
+                    var gasprice = (rdr["gas_price"]).ToString();
+                    if (gasprice == "") {
+                        gasprice = "0";
+                    }
 
-                    bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
+                    bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata }, { "gaslimit", gaslimit}, { "gasprice", gasprice} }); //
                 }
                 return res.result = bk;
             }
@@ -1721,7 +1755,8 @@ namespace NEO_Block_API.lib
                     txid = "0x" + txid;
                 }
 
-                string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_" + req.@params[0] + " where txid='" + txid + "'";
+                string gas = getGasConsumed(txid, req.@params[0].ToString());
+                string select = "select txid, size, type, version, blockheight, gas_limit, gas_price from tx_" + req.@params[0] + " where txid='" + txid + "'";
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1732,15 +1767,24 @@ namespace NEO_Block_API.lib
                 JArray bk = new JArray();
                 while (rdr.Read())
                 {
-
                     var adata = (rdr["txid"]).ToString();
                     var size = int.Parse((rdr["size"]).ToString());
                     var type = (rdr["type"]).ToString();
                     var vs = (rdr["version"]).ToString();
                     var bdata = (rdr["blockheight"]).ToString();
-                    var sdata = int.Parse((rdr["sys_fee"]).ToString());
+                    var sdata = gas;
+                    var gaslimit = (rdr["gas_limit"]).ToString();
+                    if (gaslimit == "")
+                    {
+                        gaslimit = "0";
+                    }
+                    var gasprice = (rdr["gas_price"]).ToString();
+                    if (gasprice == "")
+                    {
+                        gasprice = "0";
+                    }
 
-                    bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
+                    bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata }, { "gaslimit", gaslimit }, { "gasprice", gasprice } }); //
                 }
                 return res.result = bk;
             }
@@ -1753,7 +1797,7 @@ namespace NEO_Block_API.lib
 			{
 				conn.Open();
 
-				string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_0000000000000000000000000000000000000000 limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
+				string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_0000000000000000000000000000000000000000 where type='InvocationTransaction' limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
 
 				MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1784,7 +1828,7 @@ namespace NEO_Block_API.lib
 			using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				conn.Open();
-				string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_" + req.@params[0]+" limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString());
+				string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_" + req.@params[0]+ " where type='InvocationTransaction' limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString());
 
 				MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1803,7 +1847,12 @@ namespace NEO_Block_API.lib
 					var bdata = (rdr["blockheight"]).ToString();
 					var sdata = int.Parse((rdr["sys_fee"]).ToString());
 
-					bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
+                    if (type == "MinerTransaction")
+                    {
+                        continue;
+                    }
+
+                    bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
 				}
 				return res.result = bk;
 			}
@@ -1816,7 +1865,7 @@ namespace NEO_Block_API.lib
             {
                 conn.Open();
 
-                string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_0000000000000000000000000000000000000000 order by id desc limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
+                string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_0000000000000000000000000000000000000000 where type='InvocationTransaction' order by id desc limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1833,6 +1882,11 @@ namespace NEO_Block_API.lib
                     var vs = (rdr["version"]).ToString();
                     var bdata = (rdr["blockheight"]).ToString();
                     var sdata = int.Parse((rdr["sys_fee"]).ToString());
+
+                    if (type == "MinerTransaction")
+                    {
+                        continue;
+                    }
 
                     bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
                 }
@@ -1847,7 +1901,7 @@ namespace NEO_Block_API.lib
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 conn.Open();
-                string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_" + req.@params[0] + " order by id desc limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString());
+                string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_" + req.@params[0] + " where type='InvocationTransaction' order by id desc limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString());
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1865,6 +1919,11 @@ namespace NEO_Block_API.lib
                     var vs = (rdr["version"]).ToString();
                     var bdata = (rdr["blockheight"]).ToString();
                     var sdata = int.Parse((rdr["sys_fee"]).ToString());
+
+                    if (type == "MinerTransaction")
+                    {
+                        continue;
+                    }
 
                     bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
                 }

@@ -61,6 +61,12 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="server.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
   <ProjectExtensions><VisualStudio><UserProperties Properties_4launchSettings_1json__JSONSchema="http://json.schemastore.org/project-1.0.0-beta6" /></VisualStudio></ProjectExtensions>
 
 </Project>

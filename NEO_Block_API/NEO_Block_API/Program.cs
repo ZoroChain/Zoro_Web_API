@@ -40,7 +40,7 @@ namespace NEO_Block_API
                 serverPort = 59908;
             }
 
-            return serverPort;            
+            return serverPort;
         }
 
         public static IWebHost BuildWebHost(string[] args) =>
@@ -48,11 +48,11 @@ namespace NEO_Block_API
                 .UseStartup<Startup>()
                 .UseKestrel(options =>
                 {
-                    options.Listen(IPAddress.Any, getServerPort());
-                    //options.Listen(IPAddress.Loopback, 5001, listenOptions =>
-                    //{
-                    //    listenOptions.UseHttps("testCert.pfx", "testPassword");
-                    //});
+                    options.Listen(IPAddress.Loopback, getServerPort());
+                    options.Listen(IPAddress.Loopback, 5001, listenOptions =>
+                    {
+                        listenOptions.UseHttps("server.pfx", "linezero");
+                    });
                 })
                 .Build();
     }
