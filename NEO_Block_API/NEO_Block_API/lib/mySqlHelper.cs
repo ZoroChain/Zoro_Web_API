@@ -1361,7 +1361,8 @@ namespace NEO_Block_API.lib
                     var fdata = (rdr["fromx"]).ToString();
                     var tdata = (rdr["tox"]).ToString();
                     var vdata = (rdr["value"]).ToString();
-                    vdata = (ulong.Parse(vdata) / Math.Pow(10, decimals)).ToString();
+                    var num = (decimal)(ulong.Parse(vdata) / Math.Pow(10, decimals));
+                    vdata = num.ToString();
 
                     bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata } });
                 }
@@ -1394,7 +1395,8 @@ namespace NEO_Block_API.lib
                     var fdata = (rdr["fromx"]).ToString();
                     var tdata = (rdr["tox"]).ToString();
                     var vdata = (rdr["value"]).ToString();
-                    vdata = (ulong.Parse(vdata) / Math.Pow(10, decimals)).ToString();
+                    var num = (decimal)(ulong.Parse(vdata) / Math.Pow(10, decimals));
+                    vdata = num.ToString();
 
                     bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata } });
                 }
@@ -1434,7 +1436,8 @@ namespace NEO_Block_API.lib
                     var fdata = (rdr["fromx"]).ToString();
                     var tdata = (rdr["tox"]).ToString();
                     var vdata = (rdr["value"]).ToString();
-                    vdata = (ulong.Parse(vdata) / Math.Pow(10, decimals)).ToString();
+                    var num = (decimal)(ulong.Parse(vdata) / Math.Pow(10, decimals));
+                    vdata = num.ToString();
 
                     bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata } });
                 }
@@ -1458,7 +1461,7 @@ namespace NEO_Block_API.lib
                     txid = "0x" + txid;
                 }
 
-                string select = "select  a.id as id, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals from nep5transfer_0000000000000000000000000000000000000000 as a, nep5asset_0000000000000000000000000000000000000000 as b where a.txid = '" + txid + "' and a.asset=b.assetid";
+                string select = "select  a.id as id, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals, b.symbol as symbol from nep5transfer_0000000000000000000000000000000000000000 as a, nep5asset_0000000000000000000000000000000000000000 as b where a.txid = '" + txid + "' and a.asset=b.assetid";
 
 				MySqlCommand cmd = new MySqlCommand(select, conn); 
 			
@@ -1471,14 +1474,16 @@ namespace NEO_Block_API.lib
 				while (rdr.Read())
 				{
                     var decimals = int.Parse(rdr["decimals"].ToString());
-					var idata = (rdr["id"]).ToString();
+                    var symbol = (rdr["symbol"]).ToString();
+                    var idata = (rdr["id"]).ToString();
 					var adata = (rdr["asset"]).ToString();
 					var fdata = (rdr["fromx"]).ToString();
 					var tdata = (rdr["tox"]).ToString();
 					var vdata = (rdr["value"]).ToString();
-                    vdata = (ulong.Parse(vdata) / Math.Pow(10, decimals)).ToString();
+                    var num = (decimal)(ulong.Parse(vdata) / Math.Pow(10, decimals));
+                    vdata = num.ToString();
 
-					bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata } , { "value", vdata } });
+					bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata } , { "value", vdata }, { "symbol", symbol} });
 				}
 
 				return res.result = bk;
@@ -1499,7 +1504,7 @@ namespace NEO_Block_API.lib
                     txid = "0x" + txid;
                 }
 
-                string select = "select  a.id as id, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals from nep5transfer_" + req.@params[0] + " as a, nep5asset_" + req.@params[0] + " as b where a.txid = '" + txid + "' and a.asset=b.assetid";
+                string select = "select  a.id as id, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals, b.symbol as symbol from nep5transfer_" + req.@params[0] + " as a, nep5asset_" + req.@params[0] + " as b where a.txid = '" + txid + "' and a.asset=b.assetid";
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1512,14 +1517,16 @@ namespace NEO_Block_API.lib
                 while (rdr.Read())
                 {
                     var decimals = int.Parse(rdr["decimals"].ToString());
+                    var symbol = (rdr["symbol"]).ToString();
                     var idata = (rdr["id"]).ToString();
                     var adata = (rdr["asset"]).ToString();
                     var fdata = (rdr["fromx"]).ToString();
                     var tdata = (rdr["tox"]).ToString();
                     var vdata = (rdr["value"]).ToString();
-                    vdata = (ulong.Parse(vdata) / Math.Pow(10, decimals)).ToString();
+                    var num = (decimal)(ulong.Parse(vdata) / Math.Pow(10, decimals));
+                    vdata = num.ToString();
 
-                    bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata } });
+                    bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata }, { "symbol", symbol } });
                 }
 
                 return res.result = bk;
