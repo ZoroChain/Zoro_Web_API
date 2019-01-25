@@ -49,10 +49,10 @@ namespace NEO_Block_API
                 .UseKestrel(options =>
                 {
                     options.Listen(IPAddress.Any, getServerPort());
-                    //options.Listen(IPAddress.Loopback, 5001, listenOptions =>
-                    //{
-                    //    listenOptions.UseHttps("server.pfx", "linezero");
-                    //});
+                    options.Listen(IPAddress.Loopback, 5001, listenOptions =>
+                    {
+                        listenOptions.UseHttps("openssl.pfx", "test1234");
+                    });
                 })
                 .Build();
     }
