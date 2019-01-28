@@ -13,7 +13,7 @@ namespace NEO_Block_API.lib
 {
 	public class mySqlHelper
 	{
-		public static string conf = "database=block;server=115.159.68.43;user id=root;Password=H@ngJIA123;sslmode=None";
+		public static string conf = "database=block;server=47.244.141.254;user id=root;Password=1234561qaz9ol.;sslmode=None";
 
 
 		public JArray GetAddress(JsonRPCrequest req)
