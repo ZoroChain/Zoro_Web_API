@@ -13,10 +13,14 @@ namespace NEO_Block_API.lib
 {
 	public class mySqlHelper
 	{
+        //testnet
 		public static string conf = "database=block;server=47.244.141.254;user id=root;Password=1234561qaz9ol.;sslmode=None";
+        /// <summary>
+        ///mainnet
+        /// </summary>
+        //public static string conf = "database=block;server=47.52.146.36;user id=root;Password=1234561qaz9ol.;sslmode=None";
 
-
-		public JArray GetAddress(JsonRPCrequest req)
+        public JArray GetAddress(JsonRPCrequest req)
 		{
 			using (MySqlConnection conn = new MySqlConnection(conf))
 			{
@@ -292,7 +296,7 @@ namespace NEO_Block_API.lib
 				//var addr = req.@params[0].ToString();
 				if (req.@params[0].ToString() == "")
 				{
-					string select = "select count(*) from tx_0000000000000000000000000000000000000000"; // inherently belongs to all appchains tx count
+					string select = "select count(*) from tx_0000000000000000000000000000000000000000 where type='InvocationTransaction'"; // inherently belongs to all appchains tx count
 
 					JsonPRCresponse res = new JsonPRCresponse();
 					MySqlCommand cmd = new MySqlCommand(select, conn);
@@ -357,7 +361,7 @@ namespace NEO_Block_API.lib
 			{
 				conn.Open();
 				//var addr = req.@params[0].ToString();		
-				string select = "select count(*) from tx_"+ req.@params[0]; //where type= + req.@params[0] + "'";
+				string select = "select count(*) from tx_"+ req.@params[0] + " where type='InvocationTransaction'"; //where type= + req.@params[0] + "'";
 
 				JsonPRCresponse res = new JsonPRCresponse();
 				MySqlCommand cmd = new MySqlCommand(select, conn);
