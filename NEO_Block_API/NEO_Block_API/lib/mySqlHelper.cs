@@ -1732,7 +1732,6 @@ namespace NEO_Block_API.lib
                     var type = (rdr["type"]).ToString();
                     var vs = (rdr["version"]).ToString();
                     var bdata = (rdr["blockheight"]).ToString();
-                    var sdata = gas;
                     var gaslimit = (rdr["gas_limit"]).ToString();
                     if (gaslimit == "") {
                         gaslimit = "0";
@@ -1741,6 +1740,7 @@ namespace NEO_Block_API.lib
                     if (gasprice == "") {
                         gasprice = "0";
                     }
+                    var sdata = decimal.Parse(gas) * decimal.Parse(gasprice);
 
                     bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata }, { "gaslimit", gaslimit}, { "gasprice", gasprice} }); //
                 }
@@ -1779,7 +1779,6 @@ namespace NEO_Block_API.lib
                     var type = (rdr["type"]).ToString();
                     var vs = (rdr["version"]).ToString();
                     var bdata = (rdr["blockheight"]).ToString();
-                    var sdata = gas;
                     var gaslimit = (rdr["gas_limit"]).ToString();
                     if (gaslimit == "")
                     {
@@ -1790,6 +1789,8 @@ namespace NEO_Block_API.lib
                     {
                         gasprice = "0";
                     }
+
+                    var sdata = decimal.Parse(gas) * decimal.Parse(gasprice);
 
                     bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata }, { "gaslimit", gaslimit }, { "gasprice", gasprice } }); //
                 }
