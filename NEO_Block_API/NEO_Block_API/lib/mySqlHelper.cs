@@ -1401,7 +1401,7 @@ namespace NEO_Block_API.lib
                     bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata } });
                 }
 
-                return res.result;
+                return res.result = bk;
 
 			}
 		}
