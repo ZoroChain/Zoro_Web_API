@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Globalization;
 using System.Text;
+using Zoro;
 
 namespace NEO_Block_API.Controllers
 {
@@ -361,16 +362,17 @@ namespace NEO_Block_API.Controllers
                         var assetAdds = msq.GetNep5AssetByAddress(chainHash, NEP5addr);
                         List<NEP5.AssetBalanceOfAddr> addrAssetBalances = new List<NEP5.AssetBalanceOfAddr>();
                         if (isNeedBalance) {
+                            //UInt160 addr = UInt160.Parse(ThinNeo.Helper.GetPublicKeyHashFromAddress(NEP5addr).ToString());
                             foreach (var assetAdd in assetAdds) {
                                 if (assetAdd["type"].ToString() == "NativeNep5")
                                 {
-                                    var nep5 = await APIHelper.getNativeBalanceFromAddressAsync(assetAdd["assetid"].ToString(), NEP5addr, chainHash);
+                                    var nep5 = await APIHelper.getNativeBalanceOfAsync(chainHash, assetAdd["assetid"].ToString(), NEP5addr);
                                     if (nep5.balance != "0")
                                         addrAssetBalances.Add(nep5);
                                 }
                                 else
                                 {
-                                    var nep5 = await APIHelper.getBalanceFromAddressAsync(assetAdd["assetid"].ToString(), NEP5addr, chainHash);
+                                    var nep5 = await APIHelper.getBalanceOfAsync(chainHash, assetAdd["assetid"].ToString(), NEP5addr);
                                     if (nep5.balance != "0")
                                         addrAssetBalances.Add(nep5);
                                 }

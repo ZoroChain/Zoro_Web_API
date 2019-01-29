@@ -14,7 +14,7 @@ namespace NEO_Block_API.lib
         public static async Task<JObject> getBalanceOfAsync(string chainHash, string assetid, string address) {
             using (ScriptBuilder sb = new ScriptBuilder())
             {               
-                sb.EmitAppCall(ZoroHelper.Parse(assetid), "balanceOf", address);
+                sb.EmitAppCall(ZoroHelper.Parse(assetid), "balanceOf", ZoroHelper.GetPublicKeyHashFromAddress(address));
                 sb.EmitAppCall(ZoroHelper.Parse(assetid), "decimals");
                 sb.EmitAppCall(ZoroHelper.Parse(assetid), "symbol");
 
