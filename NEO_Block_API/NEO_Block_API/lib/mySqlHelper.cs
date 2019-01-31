@@ -13,12 +13,7 @@ namespace NEO_Block_API.lib
 {
 	public class mySqlHelper
 	{
-        //testnet
-		public static string conf = "database=block;server=47.244.141.254;user id=root;Password=1234561qaz9ol.;sslmode=None";
-        /// <summary>
-        ///mainnet
-        /// </summary>
-        //public static string conf = "database=block;server=47.52.146.36;user id=root;Password=1234561qaz9ol.;sslmode=None";
+        public static string conf = "";
 
         public JArray GetAddress(JsonRPCrequest req)
 		{
@@ -37,18 +32,12 @@ namespace NEO_Block_API.lib
 				MySqlDataReader rdr = cmd.ExecuteReader();
 				while (rdr.Read())
 				{
-
 					var adata = (rdr["firstuse"]).ToString();
 					var ldata = (rdr["lastuse"]).ToString();
 					var tdata = (rdr["txcount"]).ToString();
 
 					 bk.Add(new JObject { { "firstuse", adata }, { "lastuse", ldata } , { "txcount", tdata } });
-
-
-				}
-
-					
-
+				}				
 				return res.result = bk;
 
 			}
@@ -1253,9 +1242,10 @@ namespace NEO_Block_API.lib
 
 					var cd = (rdr["decimals"]).ToString();
 
+                    var num = (decimal)(ulong.Parse(ts) / Math.Pow(10, int.Parse(cd)));
+                    ts = Convert.ToDouble(num.ToString()).ToString("f8");
 
-
-					bk.Add(new JObject { {"assetid", adata } , { "totalsupply", ts }, { "name", name }, { "symbol", sb } , { "decimals", cd } });
+                    bk.Add(new JObject { {"assetid", adata } , { "totalsupply", ts }, { "name", name }, { "symbol", sb } , { "decimals", cd } });
 
 				}
 				return res.result = bk;
@@ -1322,7 +1312,8 @@ namespace NEO_Block_API.lib
 
                     var cd = (rdr["decimals"]).ToString();
 
-
+                    var num = (decimal)(ulong.Parse(ts) / Math.Pow(10, int.Parse(cd)));
+                    ts = Convert.ToDouble(num.ToString()).ToString("f8");
 
                     bk.Add(new JObject { { "assetid", adata }, { "totalsupply", ts }, { "name", name }, { "symbol", sb }, { "decimals", cd } });
 
@@ -1372,6 +1363,36 @@ namespace NEO_Block_API.lib
                 }
 
                 return res.result;
+            }
+        }
+
+        public JArray GetScriptMethod(string chainhash, string txid) {
+
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+
+                conn.Open();
+                string select = "select calltype, method, contract from tx_script_method_" + chainhash + " where txid='" + txid + "'";
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+
+
+                JsonPRCresponse res = new JsonPRCresponse();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                JArray bk = new JArray();
+                while (rdr.Read())
+                {
+                    var calltype = (rdr["calltype"]).ToString();
+                    var method = (rdr["method"]).ToString();
+                    var contract = (rdr["contract"]).ToString();
+
+                    bk.Add(new JObject { { "calltype", calltype }, { "method", method }, { "contract", contract } });
+                }
+
+                return res.result = bk;
+
             }
         }
 

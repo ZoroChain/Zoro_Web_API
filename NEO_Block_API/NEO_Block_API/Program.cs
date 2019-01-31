@@ -8,6 +8,7 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using NEO_Block_API.lib;
 
 namespace NEO_Block_API
 {
@@ -18,6 +19,7 @@ namespace NEO_Block_API
 
         public static void Main(string[] args)
         {
+            mySqlHelper.conf = Settings.Default.MysqlConfig;
             BuildWebHost(args).Run();
         }
 

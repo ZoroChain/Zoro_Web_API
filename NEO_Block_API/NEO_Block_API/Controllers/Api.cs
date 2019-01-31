@@ -294,6 +294,24 @@ namespace NEO_Block_API.Controllers
                     case "getnep5allnep5assetofaddress":
                         result = msq.GetAllNep5AssetOfAddress(req);
                         break;
+                    case "getscriptmethod":
+                        string chainhash = "";
+                        if (req.@params.Length > 1)
+                        {
+                            if (req.@params[0].ToString() == "")
+                            {
+                                chainhash = "0000000000000000000000000000000000000000";
+                            }
+                            else {
+                                chainhash = req.@params[0].ToString();
+                            }
+                            result = msq.GetScriptMethod(chainhash, req.@params[1].ToString());
+                        }
+                        else
+                        {
+                            result = msq.GetScriptMethod("0000000000000000000000000000000000000000", req.@params[0].ToString());
+                        }
+                        break;
                     case "sendrawtransaction":
                         var tx = "";
                         if (req.@params.Length > 1)
