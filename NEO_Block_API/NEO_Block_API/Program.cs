@@ -20,6 +20,8 @@ namespace NEO_Block_API
         public static void Main(string[] args)
         {
             mySqlHelper.conf = Settings.Default.MysqlConfig;
+            local = Settings.Default.Url;
+            ZoroHelper.ZoroUrl = Settings.Default.Url;
             BuildWebHost(args).Run();
         }
 

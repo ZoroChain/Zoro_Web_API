@@ -9,6 +9,7 @@ namespace NEO_Block_API
     internal class Settings
     {
         public string MysqlConfig { get; }
+        public string Url { get; }
         public static Settings Default { get; }
 
         static Settings() {
@@ -24,6 +25,7 @@ namespace NEO_Block_API
                 MysqlConfig += item.Key + " = " + item.Value;
                 MysqlConfig += ";";
             }
+            Url = section.GetSection("UrL").Value;
         }
     }
 }
