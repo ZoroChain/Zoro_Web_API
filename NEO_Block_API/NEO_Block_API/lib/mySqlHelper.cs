@@ -968,7 +968,7 @@ namespace NEO_Block_API.lib
 				conn.Open();
 
 			
-				string select = "select  size , version, hash , previousblockhash , merkleroot , time , indexx , nonce , nextconsensus , script ,tx  from block_0000000000000000000000000000000000000000 limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
+				string select = "select  size , hash , time , indexx, txcount from block_0000000000000000000000000000000000000000 limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
 
 				MySqlCommand cmd = new MySqlCommand(select, conn);
 				
@@ -981,19 +981,12 @@ namespace NEO_Block_API.lib
 				{
 
 					var sdata = (rdr["size"]).ToString();
-					var adata = (rdr["version"]).ToString();
 					var hash = (rdr["hash"]).ToString();
-					var pdata = (rdr["previousblockhash"]).ToString();
 					var ind = (rdr["indexx"]).ToString();
-					var mdata = (rdr["merkleroot"]).ToString();
 					var tdata = (rdr["time"]).ToString();
-					var ndata = (rdr["nonce"]).ToString();
-					var nc = (rdr["nextconsensus"]).ToString();
-					var s = (rdr["script"]).ToString();
-					var tx = (rdr["tx"]).ToString();
+                    var txcount = (rdr["txcount"]).ToString();
 
-
-					bk.Add(new JObject { { "size", sdata }, { "version", adata }, { "hash", hash }, { "previousblockhash", pdata }, { "index", ind }, { "merkleroot", mdata }, { "time", tdata }, { "nonce", ndata }, { "nextconsensus", nc } , { "script", s }, {"tx",JArray.Parse(tx) }});
+					bk.Add(new JObject { { "size", sdata }, { "hash", hash }, { "index", ind }, { "time", tdata }, {"txcount", txcount } });
 				}
 
 				return res.result = bk;
@@ -1479,14 +1472,13 @@ namespace NEO_Block_API.lib
 			{
 
 				conn.Open();
-
                 string txid = req.@params[0].ToString();
                 if (!txid.StartsWith("0x"))
                 {
                     txid = "0x" + txid;
                 }
 
-                string select = "select  a.id as id, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals, b.symbol as symbol from nep5transfer_0000000000000000000000000000000000000000 as a, nep5asset_0000000000000000000000000000000000000000 as b where a.txid = '" + txid + "' and a.asset=b.assetid";
+                string select = "select a.blockindex as blockindex, a.txid as txid, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals, b.symbol as symbol from nep5transfer_0000000000000000000000000000000000000000 as a, nep5asset_0000000000000000000000000000000000000000 as b where a.txid = '" + txid + "' and a.asset=b.assetid";
 
 				MySqlCommand cmd = new MySqlCommand(select, conn); 
 			
@@ -1500,15 +1492,16 @@ namespace NEO_Block_API.lib
 				{
                     var decimals = int.Parse(rdr["decimals"].ToString());
                     var symbol = (rdr["symbol"]).ToString();
-                    var idata = (rdr["id"]).ToString();
+                    var idata = (rdr["txid"]).ToString();
 					var adata = (rdr["asset"]).ToString();
 					var fdata = (rdr["fromx"]).ToString();
 					var tdata = (rdr["tox"]).ToString();
 					var vdata = (rdr["value"]).ToString();
                     var num = (decimal)(ulong.Parse(vdata) / Math.Pow(10, decimals));
+                    var blockindex = (rdr["blockindex"]).ToString();
                     vdata = num.ToString();
 
-					bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata } , { "value", vdata }, { "symbol", symbol} });
+					bk.Add(new JObject { { "blockindex", blockindex }, { "txid", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata } , { "value", vdata }, { "symbol", symbol} });
 				}
 
 				return res.result = bk;
@@ -1529,7 +1522,7 @@ namespace NEO_Block_API.lib
                     txid = "0x" + txid;
                 }
 
-                string select = "select  a.id as id, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals, b.symbol as symbol from nep5transfer_" + req.@params[0] + " as a, nep5asset_" + req.@params[0] + " as b where a.txid = '" + txid + "' and a.asset=b.assetid";
+                string select = "select a.blockindex as blockindex, a.txid as txid, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals, b.symbol as symbol from nep5transfer_" + req.@params[0] + " as a, nep5asset_" + req.@params[0] + " as b where a.txid = '" + txid + "' and a.asset=b.assetid";
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1543,21 +1536,126 @@ namespace NEO_Block_API.lib
                 {
                     var decimals = int.Parse(rdr["decimals"].ToString());
                     var symbol = (rdr["symbol"]).ToString();
-                    var idata = (rdr["id"]).ToString();
+                    var idata = (rdr["txid"]).ToString();
                     var adata = (rdr["asset"]).ToString();
                     var fdata = (rdr["fromx"]).ToString();
                     var tdata = (rdr["tox"]).ToString();
                     var vdata = (rdr["value"]).ToString();
                     var num = (decimal)(ulong.Parse(vdata) / Math.Pow(10, decimals));
+                    var blockindex = (rdr["blockindex"]).ToString();
                     vdata = num.ToString();
 
-                    bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata }, { "symbol", symbol } });
+                    bk.Add(new JObject { { "blockindex", blockindex }, { "txid", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata }, { "symbol", symbol } });
                 }
 
                 return res.result = bk;
 
             }
         }
+
+        public JArray GetNep5TransferByTxids(JsonRPCrequest req)
+        {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+
+                conn.Open();
+
+                string select = "select a.blockindex as blockindex, a.txid as txid, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals, b.symbol as symbol from nep5transfer_0000000000000000000000000000000000000000 as a, nep5asset_0000000000000000000000000000000000000000 as b where a.asset=b.assetid and a.txid in (";
+
+                int length = req.@params.Length;
+                for (int i = 0; i < req.@params.Length; i++) {
+                    string txid = req.@params[i].ToString();
+                    if (!txid.StartsWith("0x"))
+                    {
+                        txid = "0x" + txid;
+                    }
+                    if (i == length - 1)
+                        select += "'" + txid + "')";
+                    else
+                        select += "'" + txid + "',";
+                }                             
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+
+
+                JsonPRCresponse res = new JsonPRCresponse();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                JArray bk = new JArray();
+                while (rdr.Read())
+                {
+                    var decimals = int.Parse(rdr["decimals"].ToString());
+                    var symbol = (rdr["symbol"]).ToString();
+                    var idata = (rdr["txid"]).ToString();
+                    var adata = (rdr["asset"]).ToString();
+                    var fdata = (rdr["fromx"]).ToString();
+                    var tdata = (rdr["tox"]).ToString();
+                    var vdata = (rdr["value"]).ToString();
+                    var num = (decimal)(ulong.Parse(vdata) / Math.Pow(10, decimals));
+                    var blockindex = (rdr["blockindex"]).ToString();
+                    vdata = num.ToString();
+
+                    bk.Add(new JObject { { "blockindex", blockindex }, { "txid", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata }, { "symbol", symbol } });
+                }
+
+                return res.result = bk;
+
+            }
+        }
+
+        public JArray GetAppChainNep5TransferByTxids(JsonRPCrequest req)
+        {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+
+                conn.Open();
+
+                string select = "select a.blockindex as blockindex, a.txid as txid, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals, b.symbol as symbol from nep5transfer_" + req.@params[0] + " as a, nep5asset_" + req.@params[0] + " as b where a.asset=b.assetid and a.txid in (";
+
+                int length = req.@params.Length;
+                for (int i = 1; i < req.@params.Length; i++)
+                {
+                    string txid = req.@params[i].ToString();
+                    if (!txid.StartsWith("0x"))
+                    {
+                        txid = "0x" + txid;
+                    }
+                    if (i == length - 1)
+                        select += "'" + txid + "')";
+                    else
+                        select += "'" + txid + "',";
+                }
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+
+
+                JsonPRCresponse res = new JsonPRCresponse();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                JArray bk = new JArray();
+                while (rdr.Read())
+                {
+                    var decimals = int.Parse(rdr["decimals"].ToString());
+                    var symbol = (rdr["symbol"]).ToString();
+                    var idata = (rdr["txid"]).ToString();
+                    var adata = (rdr["asset"]).ToString();
+                    var fdata = (rdr["fromx"]).ToString();
+                    var tdata = (rdr["tox"]).ToString();
+                    var vdata = (rdr["value"]).ToString();
+                    var num = (decimal)(ulong.Parse(vdata) / Math.Pow(10, decimals));
+                    var blockindex = (rdr["blockindex"]).ToString();
+                    vdata = num.ToString();
+
+                    bk.Add(new JObject { { "blockindex", blockindex }, { "txid", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata }, { "symbol", symbol } });
+                }
+
+                return res.result = bk;
+
+            }
+        }
+
         public JArray GetNep5Count(JsonRPCrequest req)
 		{
 			using (MySqlConnection conn = new MySqlConnection(conf))

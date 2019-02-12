@@ -33,7 +33,7 @@ namespace NEO_Block_API.Controllers
             DateTime start = DateTime.Now;
 
             try
-            {
+            {              
                 req = new JsonRPCrequest
                 {
                     jsonrpc = @jsonrpc,
