@@ -1528,10 +1528,6 @@ namespace NEO_Block_API.lib
                     {
                         bk.Add(new JObject { { "blockindex", "" }, { "txid", "" }, { "asset", "" }, { "from", "" }, { "to", "" }, { "value", "" }, { "symbol", "" } });
                     }
-                    else
-                    {
-                        bk.Add(new JObject { { "error", "can't get tranfer from this txid" } });
-                    }
                 }
 
 				return res.result = bk;
@@ -1584,10 +1580,6 @@ namespace NEO_Block_API.lib
                     if (notify)
                     {
                         bk.Add(new JObject { { "blockindex", "" }, { "txid", "" }, { "asset", "" }, { "from", "" }, { "to", "" }, { "value", "" }, { "symbol", "" } });
-                    }
-                    else
-                    {
-                        bk.Add(new JObject { { "error", "can't get tranfer from this txid" } });
                     }
                 }
 
