@@ -1465,12 +1465,12 @@ namespace NEO_Block_API.lib
             }
         }
 
-        private bool GetNotify(string txid, string chainhash) {
+        private int GetNotify(string txid, string chainhash) {
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 conn.Open();
 
-                string select = "select * from notify_" + chainhash + " where txid='" + txid + "'";
+                string select = "select blockindex from notify_" + chainhash + " where txid='" + txid + "'";
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
                 JsonPRCresponse res = new JsonPRCresponse();
@@ -1478,10 +1478,10 @@ namespace NEO_Block_API.lib
                 MySqlDataReader rdr = cmd.ExecuteReader();
                 while (rdr.Read())
                 {
-                    return true;
+                    return int.Parse((rdr["blockindex"]).ToString());
                 }
             }
-            return false;
+            return -1;
         }
 
 		public JArray GetNep5TransferByTxid(JsonRPCrequest req)
@@ -1523,10 +1523,10 @@ namespace NEO_Block_API.lib
 				}
 
                 if (bk.Count < 1) {
-                    bool notify = GetNotify(txid, "0000000000000000000000000000000000000000");
-                    if (notify)
+                    int blockindex = GetNotify(txid, "0000000000000000000000000000000000000000");
+                    if (blockindex > -1)
                     {
-                        bk.Add(new JObject { { "blockindex", "" }, { "txid", "" }, { "asset", "" }, { "from", "" }, { "to", "" }, { "value", "" }, { "symbol", "" } });
+                        bk.Add(new JObject { { "blockindex", blockindex }, { "txid", txid }, { "asset", "" }, { "from", "" }, { "to", "" }, { "value", "" }, { "symbol", "" } });
                     }
                 }
 
@@ -1576,10 +1576,10 @@ namespace NEO_Block_API.lib
 
                 if (bk.Count < 1)
                 {
-                    bool notify = GetNotify(txid, req.@params[0].ToString());
-                    if (notify)
+                    int blockindex = GetNotify(txid, req.@params[0].ToString());
+                    if (blockindex > -1)
                     {
-                        bk.Add(new JObject { { "blockindex", "" }, { "txid", "" }, { "asset", "" }, { "from", "" }, { "to", "" }, { "value", "" }, { "symbol", "" } });
+                        bk.Add(new JObject { { "blockindex", blockindex }, { "txid", txid }, { "asset", "" }, { "from", "" }, { "to", "" }, { "value", "" }, { "symbol", "" } });
                     }
                 }
 

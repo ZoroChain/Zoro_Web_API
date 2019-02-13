@@ -280,6 +280,14 @@ namespace NEO_Block_API.Controllers
                         result = msq.GetAppChainNep5TransferByTxid(req);
                         break;
                     #endregion
+                    #region 获取nep5transferbytxidex
+                    case "getnep5transferbytxidex":
+                        result = msq.GetNep5TransferByTxidEX(req);
+                        break;
+                    case "getappchainnep5transferbytxidex":
+                        result = msq.GetAppChainNep5TransferByTxidEX(req);
+                        break;
+                    #endregion
                     #region 获取nep5transferbytxids
                     case "getnep5transferbytxids":
                         result = msq.GetNep5TransferByTxids(req);
