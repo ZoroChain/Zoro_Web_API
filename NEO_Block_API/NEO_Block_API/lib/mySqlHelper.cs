@@ -1465,6 +1465,24 @@ namespace NEO_Block_API.lib
             }
         }
 
+        private bool GetNotify(string txid, string chainhash) {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();
+
+                string select = "select * from notify_" + chainhash + " where txid='" + txid + "'";
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                JsonPRCresponse res = new JsonPRCresponse();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                while (rdr.Read())
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
 		public JArray GetNep5TransferByTxid(JsonRPCrequest req)
 		{
@@ -1503,6 +1521,18 @@ namespace NEO_Block_API.lib
 
 					bk.Add(new JObject { { "blockindex", blockindex }, { "txid", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata } , { "value", vdata }, { "symbol", symbol} });
 				}
+
+                if (bk.Count < 1) {
+                    bool notify = GetNotify(txid, "0000000000000000000000000000000000000000");
+                    if (notify)
+                    {
+                        bk.Add(new JObject { { "blockindex", "" }, { "txid", "" }, { "asset", "" }, { "from", "" }, { "to", "" }, { "value", "" }, { "symbol", "" } });
+                    }
+                    else
+                    {
+                        bk.Add(new JObject { { "error", "can't get tranfer from this txid" } });
+                    }
+                }
 
 				return res.result = bk;
 
@@ -1548,6 +1578,19 @@ namespace NEO_Block_API.lib
                     bk.Add(new JObject { { "blockindex", blockindex }, { "txid", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata }, { "symbol", symbol } });
                 }
 
+                if (bk.Count < 1)
+                {
+                    bool notify = GetNotify(txid, req.@params[0].ToString());
+                    if (notify)
+                    {
+                        bk.Add(new JObject { { "blockindex", "" }, { "txid", "" }, { "asset", "" }, { "from", "" }, { "to", "" }, { "value", "" }, { "symbol", "" } });
+                    }
+                    else
+                    {
+                        bk.Add(new JObject { { "error", "can't get tranfer from this txid" } });
+                    }
+                }
+
                 return res.result = bk;
 
             }
@@ -1560,10 +1603,11 @@ namespace NEO_Block_API.lib
 
                 conn.Open();
 
-                string select = "select a.blockindex as blockindex, a.txid as txid, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals, b.symbol as symbol from nep5transfer_0000000000000000000000000000000000000000 as a, nep5asset_0000000000000000000000000000000000000000 as b where a.asset=b.assetid and a.txid in (";
-
+                string select = "select a.blockindex as blockindex, a.txid as txid, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals, b.symbol as symbol from ";
+                select += "(select blockindex, txid, asset, fromx, tox, value from nep5transfer_0000000000000000000000000000000000000000 where txid in (";
                 int length = req.@params.Length;
-                for (int i = 0; i < req.@params.Length; i++) {
+                for (int i = 0; i < req.@params.Length; i++)
+                {
                     string txid = req.@params[i].ToString();
                     if (!txid.StartsWith("0x"))
                     {
@@ -1573,7 +1617,8 @@ namespace NEO_Block_API.lib
                         select += "'" + txid + "')";
                     else
                         select += "'" + txid + "',";
-                }                             
+                }
+                select += ") as a, nep5asset_0000000000000000000000000000000000000000 as b where a.asset=b.assetid";                          
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1608,11 +1653,10 @@ namespace NEO_Block_API.lib
         {
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
-
                 conn.Open();
 
-                string select = "select a.blockindex as blockindex, a.txid as txid, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals, b.symbol as symbol from nep5transfer_" + req.@params[0] + " as a, nep5asset_" + req.@params[0] + " as b where a.asset=b.assetid and a.txid in (";
-
+                string select = "select a.blockindex as blockindex, a.txid as txid, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals, b.symbol as symbol from ";
+                select += "(select blockindex, txid, asset, fromx, tox, value from nep5transfer_" + req.@params[0] + " where txid in (";
                 int length = req.@params.Length;
                 for (int i = 1; i < req.@params.Length; i++)
                 {
@@ -1626,6 +1670,7 @@ namespace NEO_Block_API.lib
                     else
                         select += "'" + txid + "',";
                 }
+                select += ") as a, nep5asset_" + req.@params[0] + " as b where a.asset=b.assetid";
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
