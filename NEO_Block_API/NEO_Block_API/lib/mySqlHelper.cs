@@ -1675,6 +1675,44 @@ namespace NEO_Block_API.lib
             }
         }
 
+        private JArray GetNotifys(object[] txid, string chainhash, int startNum)
+        {
+            JArray bk = new JArray();
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();
+
+                string select = "select blockindex, txid from notify_" + chainhash + " where txid in (";
+                int length = txid.Length;
+                for (int i = startNum; i < length; i++)
+                {
+                    string single = txid[i].ToString();
+                    if (!single.StartsWith("0x"))
+                    {
+                        single = "0x" + single;
+                    }
+                    if (i == length - 1)
+                        select += "'" + single + "')";
+                    else
+                        select += "'" + single + "',";
+                }
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                JsonPRCresponse res = new JsonPRCresponse();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                
+                while (rdr.Read())
+                {
+                    string blockindex = (rdr["blockindex"]).ToString();
+                    string tx = (rdr["txid"]).ToString();
+
+                    bk.Add(new JObject { { "blockindex", blockindex }, { "txid", tx } });
+                }
+            }
+            return bk;
+        }
+
         public JArray GetNep5TransferByTxids(JsonRPCrequest req)
         {
             using (MySqlConnection conn = new MySqlConnection(conf))
@@ -1685,7 +1723,7 @@ namespace NEO_Block_API.lib
                 string select = "select a.blockindex as blockindex, a.txid as txid, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals, b.symbol as symbol from ";
                 select += "(select blockindex, txid, asset, fromx, tox, value from nep5transfer_0000000000000000000000000000000000000000 where txid in (";
                 int length = req.@params.Length;
-                for (int i = 0; i < req.@params.Length; i++)
+                for (int i = 0; i < length; i++)
                 {
                     string txid = req.@params[i].ToString();
                     if (!txid.StartsWith("0x"))
@@ -1706,7 +1744,7 @@ namespace NEO_Block_API.lib
                 JsonPRCresponse res = new JsonPRCresponse();
 
                 MySqlDataReader rdr = cmd.ExecuteReader();
-                JArray bk = new JArray();
+                JArray bk = new JArray();         
                 while (rdr.Read())
                 {
                     var decimals = int.Parse(rdr["decimals"].ToString());
@@ -1723,6 +1761,15 @@ namespace NEO_Block_API.lib
                     bk.Add(new JObject { { "blockindex", blockindex }, { "txid", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata }, { "symbol", symbol } });
                 }
 
+                JArray notify = GetNotifys(req.@params, "0000000000000000000000000000000000000000", 0);
+                int j = 0;
+                for (int i = 0; i < notify.Count; i++) {
+                    if (notify[i]["txid"].ToString() != bk[i - j]["txid"].ToString()) {
+                        j++;
+                        bk.Add(new JObject { { "blockindex", notify[i]["blockindex"].ToString() }, { "txid", notify[i]["txid"].ToString() }, { "asset", "" }, { "from", "" }, { "to", "" }, { "value", "" }, { "symbol", "" } });
+                    }
+                }
+
                 return res.result = bk;
 
             }
@@ -1737,7 +1784,7 @@ namespace NEO_Block_API.lib
                 string select = "select a.blockindex as blockindex, a.txid as txid, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals, b.symbol as symbol from ";
                 select += "(select blockindex, txid, asset, fromx, tox, value from nep5transfer_" + req.@params[0] + " where txid in (";
                 int length = req.@params.Length;
-                for (int i = 1; i < req.@params.Length; i++)
+                for (int i = 1; i < length; i++)
                 {
                     string txid = req.@params[i].ToString();
                     if (!txid.StartsWith("0x"))
@@ -1773,6 +1820,17 @@ namespace NEO_Block_API.lib
                     vdata = num.ToString();
 
                     bk.Add(new JObject { { "blockindex", blockindex }, { "txid", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata }, { "symbol", symbol } });
+                }
+
+                JArray notify = GetNotifys(req.@params, req.@params[0].ToString(), 1);
+                int j = 0;
+                for (int i = 0; i < notify.Count; i++)
+                {
+                    if (notify[i]["txid"].ToString() != bk[i - j]["txid"].ToString())
+                    {
+                        j++;
+                        bk.Add(new JObject { { "blockindex", notify[i]["blockindex"].ToString() }, { "txid", notify[i]["txid"].ToString() }, { "asset", "" }, { "from", "" }, { "to", "" }, { "value", "" }, { "symbol", "" } });
+                    }
                 }
 
                 return res.result = bk;
@@ -2040,6 +2098,95 @@ namespace NEO_Block_API.lib
                     var sdata = decimal.Parse(gas) * decimal.Parse(gasprice);
 
                     bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata }, { "gaslimit", gaslimit }, { "gasprice", gasprice } }); //
+                }
+                return res.result = bk;
+            }
+
+        }
+
+        public JArray GetTransactions_EX(JsonRPCrequest req)  // needs a sorting by txtype miner , reg or issue
+        {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();
+
+                string select = "select blockheight, txid, sys_fee, gas_limit, gas_price from tx_0000000000000000000000000000000000000000 where txid in (";
+                int length = req.@params.Length;
+                for (int i = 0; i < length; i++)
+                {
+                    string single = req.@params[i].ToString();
+                    if (!single.StartsWith("0x"))
+                    {
+                        single = "0x" + single;
+                    }
+                    if (i == length - 1)
+                        select += "'" + single + "')";
+                    else
+                        select += "'" + single + "',";
+                }
+
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                JsonPRCresponse res = new JsonPRCresponse();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+                while (rdr.Read())
+                {
+                    var blockindex = (rdr["blockheight"]).ToString();
+                    var txid = (rdr["txid"]).ToString();
+                    var sys_fee = (rdr["sys_fee"]).ToString();
+                    var gas_limit = (rdr["gas_limit"]).ToString();
+                    var gas_price = (rdr["gas_price"]).ToString();
+
+                    bk.Add(new JObject { { "txid", txid }, { "blockindex", blockindex }, { "sys_fee", sys_fee }, { "gas_limit", gas_limit }, { "gas_price", gas_price } }); //
+                }
+                return res.result = bk;
+            }
+
+        }
+
+
+        public JArray GetAppChainTransactions_EX(JsonRPCrequest req)  // needs a sorting by txtype miner , reg or issue
+        {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();
+
+                string select = "select blockheight, txid, sys_fee, gas_limit, gas_price from tx_" + req.@params[0] + " where txid in (";
+                int length = req.@params.Length;
+                for (int i = 1; i < length; i++)
+                {
+                    string single = req.@params[i].ToString();
+                    if (!single.StartsWith("0x"))
+                    {
+                        single = "0x" + single;
+                    }
+                    if (i == length - 1)
+                        select += "'" + single + "')";
+                    else
+                        select += "'" + single + "',";
+                }
+
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                JsonPRCresponse res = new JsonPRCresponse();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+                while (rdr.Read())
+                {
+                    var blockindex = (rdr["blockheight"]).ToString();
+                    var txid = (rdr["txid"]).ToString();
+                    var sys_fee = (rdr["sys_fee"]).ToString();
+                    var gas_limit = (rdr["gas_limit"]).ToString();
+                    var gas_price = (rdr["gas_price"]).ToString();
+
+                    bk.Add(new JObject { { "txid", txid }, { "blockindex", blockindex }, { "sys_fee", sys_fee }, { "gas_limit", gas_limit }, { "gas_price", gas_price } }); //
                 }
                 return res.result = bk;
             }
