@@ -1,18 +1,18 @@
-﻿using Neo.VM;
-using Newtonsoft.Json.Linq;
+﻿using Zoro;
+using Zoro.IO;
+using Zoro.IO.Json;
+using Zoro.Wallets;
+using Zoro.SmartContract;
+using Zoro.Cryptography;
+using Zoro.Cryptography.ECC;
+using Zoro.Network.P2P.Payloads;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Zoro;
-using Zoro.Cryptography;
-using Zoro.Cryptography.ECC;
-using Zoro.IO;
-using Zoro.Network.P2P.Payloads;
-using Zoro.SmartContract;
-using Zoro.Wallets;
+using Neo.VM;
 
 namespace NEO_Block_API
 {
@@ -176,31 +176,6 @@ namespace NEO_Block_API
             return outd;
         }
 
-        public static async Task<string> SendRawTransaction(byte[] script, string chainHash)
-        {
-            string scriptPublish = script.ToHexString();
-
-            byte[] postdata;
-            string url;
-            JArray postArray = new JArray();
-            postArray.Add(chainHash);
-            postArray.Add(scriptPublish);
-
-            url = Helper.MakeRpcUrlPost(ZoroUrl, "sendrawtransaction", out postdata, postArray);
-
-            string result = "";
-            try
-            {
-                result = await Helper.HttpPost(url, postdata);
-
-            }
-            catch (Exception)
-            {
-            }
-
-            return result;
-        }
-
         public static async Task<string> InvokeScript(byte[] script, string chainHash)
         {
             string scriptPublish = script.ToHexString();
@@ -211,7 +186,7 @@ namespace NEO_Block_API
             postArray.Add(chainHash);
             postArray.Add(scriptPublish);
 
-            url = Helper.MakeRpcUrlPost(ZoroUrl, "invokescript", out postdata, postArray);
+            url = Helper.MakeRpcUrlPost(Program.local, "invokescript", out postdata, postArray);
 
             string result = "";
             try
@@ -226,15 +201,23 @@ namespace NEO_Block_API
             return result;
         }
 
-        public static async Task<decimal> GetScriptGasConsumed(byte[] script, string chainHash)
+        public static string GetJsonValue(MyJson.JsonNode_Object item)
         {
-            var info = await InvokeScript(script, chainHash);
+            var type = item["type"].ToString();
+            var value = item["value"];
+            if (type == "ByteArray")
+            {
+                var bt = HexString2Bytes(value.AsString());
+                var num = new BigInteger(bt);
+                return num.ToString();
 
-            JObject json_result_array = JObject.Parse(info) as JObject;
-            JObject json_result_obj = json_result_array["result"] as JObject;
+            }
+            else if (type == "Integer")
+            {
+                return value.ToString();
 
-            var consume = json_result_obj["gas_consumed"].ToString();
-            return decimal.Parse(consume);
+            }
+            return "";
         }
 
         public static InvocationTransaction MakeTransaction(byte[] script, KeyPair keypair, Fixed8 gasLimit, Fixed8 gasPrice)
@@ -286,7 +269,7 @@ namespace NEO_Block_API
             return tx;
         }
 
-        public static async Task<string> SendRawTransaction(string rawdata, string chainHash)
+        public static async Task<string> PostHttpRequest(string method, string rawdata, string chainHash)
         {
             string url;
             byte[] postdata;
@@ -295,7 +278,7 @@ namespace NEO_Block_API
             postRawArray.Add(chainHash);
             postRawArray.Add(rawdata);
 
-            url = Helper.MakeRpcUrlPost(ZoroUrl, "sendrawtransaction", out postdata, postRawArray);
+            url = Helper.MakeRpcUrlPost(Program.local, method, out postdata, postRawArray);
 
             string result = "";
             try
@@ -311,16 +294,47 @@ namespace NEO_Block_API
             return result;
         }
 
-        public static async Task<string> SendInvocationTransaction(byte[] script, KeyPair keypair, string chainHash, Fixed8 gasLimit, Fixed8 gasPrice)
+        public static async Task<string> SendRawTransaction(string tx, string chainHash)
         {
-            InvocationTransaction tx = MakeTransaction(script, keypair, gasLimit, gasPrice);
+            return await PostHttpRequest("sendrawtransaction", tx, chainHash);
+        }
+
+        public static async Task<decimal> EstimateGas(string tx, string chainHash)
+        {
+            var response = await PostHttpRequest("estimategas", tx, chainHash);
+            JObject json_response = JObject.Parse(response);
+            JObject json_result = json_response["result"];
+            JObject json_gas_consumed = json_result["gas_consumed"];
+            decimal gas_consumed = (decimal)json_gas_consumed.AsNumber();
+            return gas_consumed;
+        }
+
+        public static async Task<string> SendInvocationTransaction(byte[] script, int m, KeyPair[] keypairs, string chainHash, Fixed8 gasPrice)
+        {
+            InvocationTransaction tx = MakeMultiSignatureTransaction(script, m, keypairs, Fixed8.Zero, gasPrice);
+
+            decimal gas_consumed = await EstimateGas(tx.ToArray().ToHexString(), chainHash);
+
+            tx = MakeMultiSignatureTransaction(script, m, keypairs, Fixed8.FromDecimal(gas_consumed), gasPrice);
 
             return await SendRawTransaction(tx.ToArray().ToHexString(), chainHash);
         }
 
-        public static async Task<string> SendInvocationTransaction(byte[] script, int m, KeyPair[] keypairs, string chainHash, Fixed8 gasLimit, Fixed8 gasPrice)
+        public static async Task<string> SendInvocationTransaction(byte[] script, KeyPair keypair, string chainHash, Fixed8 gasPrice)
         {
-            InvocationTransaction tx = MakeMultiSignatureTransaction(script, m, keypairs, gasLimit, gasPrice);
+            InvocationTransaction tx = MakeTransaction(script, keypair, Fixed8.Zero, gasPrice);
+
+            decimal gas_consumed = await EstimateGas(tx.ToArray().ToHexString(), chainHash);
+
+            tx = MakeTransaction(script, keypair, Fixed8.FromDecimal(gas_consumed), gasPrice);
+
+            return await SendRawTransaction(tx.ToArray().ToHexString(), chainHash);
+        }
+
+
+        public static async Task<string> SendInvocationTransaction(byte[] script, KeyPair keypair, string chainHash, Fixed8 gasLimit, Fixed8 gasPrice)
+        {
+            InvocationTransaction tx = MakeTransaction(script, keypair, gasLimit, gasPrice);
 
             return await SendRawTransaction(tx.ToArray().ToHexString(), chainHash);
         }

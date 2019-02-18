@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Zoro.Cryptography;
 using System.Linq;
-using Newtonsoft.Json.Linq;
 using Zoro;
+using Zoro.IO.Json;
 
 namespace NEO_Block_API
 {
@@ -63,7 +63,7 @@ namespace NEO_Block_API
             return url;
         }
 
-        public static string MakeRpcUrl(string url, string method, params string[] _params)
+        public static string MakeRpcUrl(string url, string method, params object[] _params)
         {
             StringBuilder sb = new StringBuilder();
             if (url.Last() != '/')
@@ -73,7 +73,7 @@ namespace NEO_Block_API
             sb.Append(url + "?jsonrpc=2.0&id=1&method=" + method + "&params=[");
             for (var i = 0; i < _params.Length; i++)
             {
-                sb.Append("\"" + _params[i].ToString() + "\"");
+                sb.Append(_params[i]);
                 if (i != _params.Length - 1)
                 {
                     sb.Append(",");

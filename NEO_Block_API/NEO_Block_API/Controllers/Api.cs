@@ -1,6 +1,5 @@
 ﻿using NEO_Block_API.lib;
 using NEO_Block_API.RPC;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -10,6 +9,7 @@ using System.Threading.Tasks;
 using System.Globalization;
 using System.Text;
 using Zoro;
+using Newtonsoft.Json.Linq;
 
 namespace NEO_Block_API.Controllers
 {
@@ -340,13 +340,13 @@ namespace NEO_Block_API.Controllers
                         var tx = "";
                         if (req.@params.Length > 1)
                         {
-                            byte[] postArray = APIHelper.HexString2Bytes(req.@params[1].ToString());
-                            tx = await ZoroHelper.SendRawTransaction(postArray, req.@params[0].ToString());
+                            //byte[] postArray = APIHelper.HexString2Bytes(req.@params[1].ToString());
+                            tx = await ZoroHelper.SendRawTransaction(req.@params[1].ToString(), req.@params[0].ToString());
                         }
                         else
                         {
-                            byte[] postArray = APIHelper.HexString2Bytes(req.@params[0].ToString());
-                            tx = await ZoroHelper.SendRawTransaction(postArray, "0000000000000000000000000000000000000000");
+                            //byte[] postArray = APIHelper.HexString2Bytes(req.@params[0].ToString());
+                            tx = await ZoroHelper.SendRawTransaction(req.@params[0].ToString(), "0000000000000000000000000000000000000000");
                         }
                         if (JObject.Parse(tx)["result"].ToString() == "True") 
                             result = new JArray() { new JObject { { "sendrawtransactionresult", JObject.Parse(tx)["result"] } } };
@@ -367,12 +367,26 @@ namespace NEO_Block_API.Controllers
                         }
                         result = new JArray() { JObject.Parse(invokescript)["result"] };
                         break;
+                    case "estimategas":
+                        decimal estimategas = 0;
+                        if (req.@params.Length > 1)
+                        {
+                            //byte[] postArray = APIHelper.HexString2Bytes(req.@params[1].ToString());
+                            estimategas = await ZoroHelper.EstimateGas(req.@params[1].ToString(), req.@params[0].ToString());
+                        }
+                        else
+                        {
+                            //byte[] postArray = APIHelper.HexString2Bytes(req.@params[0].ToString());
+                            estimategas = await ZoroHelper.EstimateGas(req.@params[0].ToString(), "0000000000000000000000000000000000000000");
+                        }
+                        result = new JArray() { new JObject{ { "gas", estimategas } } };
+                        break;
                     case "getcontractstate":
                         var url = "";
                         if (req.@params.Length > 1)
                         {
                             byte[] postArray = null;
-                            JArray jArray = new JArray();
+                            Zoro.IO.Json.JArray jArray = new Zoro.IO.Json.JArray();
                             jArray.Add(req.@params[0].ToString());
                             jArray.Add(req.@params[1].ToString());
                             url = Helper.MakeRpcUrlPost(ZoroHelper.ZoroUrl, "getcontractstate", out postArray, jArray);
@@ -381,7 +395,7 @@ namespace NEO_Block_API.Controllers
                         else
                         {
                             byte[] postArray = null;
-                            JArray jArray = new JArray();
+                            Zoro.IO.Json.JArray jArray = new Zoro.IO.Json.JArray();
                             jArray.Add("0000000000000000000000000000000000000000");
                             jArray.Add(req.@params[0].ToString());
                             url = Helper.MakeRpcUrlPost(ZoroHelper.ZoroUrl, "getcontractstate", out postArray, jArray);
