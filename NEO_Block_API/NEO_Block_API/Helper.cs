@@ -73,7 +73,7 @@ namespace NEO_Block_API
             sb.Append(url + "?jsonrpc=2.0&id=1&method=" + method + "&params=[");
             for (var i = 0; i < _params.Length; i++)
             {
-                sb.Append(_params[i]);
+                sb.Append("\"" + _params[i] + "\"");
                 if (i != _params.Length - 1)
                 {
                     sb.Append(",");
