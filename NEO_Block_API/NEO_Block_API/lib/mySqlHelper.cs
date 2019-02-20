@@ -1764,7 +1764,7 @@ namespace NEO_Block_API.lib
                 JArray notify = GetNotifys(req.@params, "0000000000000000000000000000000000000000", 0);
                 int j = 0;
                 for (int i = 0; i < notify.Count; i++) {
-                    if (notify[i]["txid"].ToString() != bk[i - j]["txid"].ToString()) {
+                    if (bk.Count == 0 || notify[i]["txid"].ToString() != bk[i - j]["txid"].ToString()) {
                         j++;
                         bk.Add(new JObject { { "blockindex", notify[i]["blockindex"].ToString() }, { "txid", notify[i]["txid"].ToString() }, { "asset", "" }, { "from", "" }, { "to", "" }, { "value", "" }, { "symbol", "" } });
                     }
@@ -1826,7 +1826,7 @@ namespace NEO_Block_API.lib
                 int j = 0;
                 for (int i = 0; i < notify.Count; i++)
                 {
-                    if (notify[i]["txid"].ToString() != bk[i - j]["txid"].ToString())
+                    if (bk.Count == 0 || notify[i]["txid"].ToString() != bk[i - j]["txid"].ToString())
                     {
                         j++;
                         bk.Add(new JObject { { "blockindex", notify[i]["blockindex"].ToString() }, { "txid", notify[i]["txid"].ToString() }, { "asset", "" }, { "from", "" }, { "to", "" }, { "value", "" }, { "symbol", "" } });
