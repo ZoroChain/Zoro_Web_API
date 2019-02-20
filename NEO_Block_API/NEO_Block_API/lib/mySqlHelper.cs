@@ -1692,7 +1692,7 @@ namespace NEO_Block_API.lib
                         single = "0x" + single;
                     }
                     if (i == length - 1)
-                        select += "'" + single + "')";
+                        select += "'" + single + "') order by blockindex ASC";
                     else
                         select += "'" + single + "',";
                 }
@@ -1735,7 +1735,7 @@ namespace NEO_Block_API.lib
                     else
                         select += "'" + txid + "',";
                 }
-                select += ") as a, nep5asset_0000000000000000000000000000000000000000 as b where a.asset=b.assetid";                          
+                select += ") as a, nep5asset_0000000000000000000000000000000000000000 as b where a.asset=b.assetid order by blockindex ASC";                          
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1764,7 +1764,8 @@ namespace NEO_Block_API.lib
                 JArray notify = GetNotifys(req.@params, "0000000000000000000000000000000000000000", 0);
                 int j = 0;
                 for (int i = 0; i < notify.Count; i++) {
-                    if (bk.Count == 0 || notify[i]["txid"].ToString() != bk[i - j]["txid"].ToString()) {
+                    if (bk.Count == 0 || bk.Count < i -j + 1 || notify[i]["txid"].ToString() != bk[i - j]["txid"].ToString())
+                    {
                         j++;
                         bk.Add(new JObject { { "blockindex", notify[i]["blockindex"].ToString() }, { "txid", notify[i]["txid"].ToString() }, { "asset", "" }, { "from", "" }, { "to", "" }, { "value", "" }, { "symbol", "" } });
                     }
@@ -1796,7 +1797,7 @@ namespace NEO_Block_API.lib
                     else
                         select += "'" + txid + "',";
                 }
-                select += ") as a, nep5asset_" + req.@params[0] + " as b where a.asset=b.assetid";
+                select += ") as a, nep5asset_" + req.@params[0] + " as b where a.asset=b.assetid order by blockindex ASC";
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
