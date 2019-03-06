@@ -847,7 +847,7 @@ namespace NEO_Block_API.lib
 
 				conn.Open();
 
-				string select = "select hashlist  from hashlist";
+				string select = "select hashlist from hashlist";
 			    
 				JsonPRCresponse res = new JsonPRCresponse();
 				MySqlCommand cmd = new MySqlCommand(select, conn);

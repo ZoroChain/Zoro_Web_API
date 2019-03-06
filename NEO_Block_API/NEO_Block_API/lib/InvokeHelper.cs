@@ -56,8 +56,9 @@ namespace NEO_Block_API.lib
                         string symbol = GetJsonSymbol(stack[2] as JObject);
 
                         Decimal value = Decimal.Parse(balance) / new Decimal(Math.Pow(10, int.Parse(decimals)));
-                        string fmt = "{0:N" + decimals + "}";
-                        result = new JObject{ { "symbol",symbol },{ "balance", string.Format(fmt, value) } };
+                        //string fmt = "{0:N" + decimals + "}";
+                        //result = new JObject{ { "symbol",symbol },{ "balance", string.Format(fmt, value) } };
+                        result = new JObject { { "symbol", symbol }, { "balance", value } };
                     }
                 }
                 else if (json.ContainsKey("error"))
