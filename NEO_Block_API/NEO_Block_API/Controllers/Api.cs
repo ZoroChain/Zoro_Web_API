@@ -318,6 +318,73 @@ namespace NEO_Block_API.Controllers
                     case "getnep5allnep5assetofaddress":
                         result = msq.GetAllNep5AssetOfAddress(req);
                         break;
+                    case "getcontractmessage":
+                        string contractChainHash = "";
+                        string contract = "";
+                        if (req.@params.Length > 1)
+                        {
+                            if (req.@params[0].ToString() == "")
+                            {
+                                contractChainHash = "0000000000000000000000000000000000000000";
+                            }
+                            else
+                            {
+                                contractChainHash = req.@params[0].ToString();
+                            }
+                            contract = req.@params[1].ToString();
+                            if (!contract.StartsWith("0x")) {
+                                contract = "0x" + contract;
+                            }
+                            result = msq.GetContractMessage(contractChainHash, contract);
+                        }
+                        else
+                        {
+                            contract = req.@params[0].ToString();
+                            if (!contract.StartsWith("0x"))
+                            {
+                                contract = "0x" + contract;
+                            }
+                            result = msq.GetContractMessage("0000000000000000000000000000000000000000", contract);
+                        }
+                        break;
+                    case "getblockinterval":
+                        string blockChainHash = "";
+                        if (req.@params.Length > 1)
+                        {
+                            if (req.@params[0].ToString() == "")
+                            {
+                                blockChainHash = "0000000000000000000000000000000000000000";
+                            }
+                            else
+                            {
+                                blockChainHash = req.@params[0].ToString();
+                            }
+                            result = msq.GetBlock2Time(blockChainHash);
+                        }
+                        else
+                        {
+                            result = msq.GetBlock2Time("0000000000000000000000000000000000000000");
+                        }                       
+                        break;
+                    case "getblockintervalnext":
+                        string blockChainHashNext = "";
+                        if (req.@params.Length > 1)
+                        {
+                            if (req.@params[0].ToString() == "")
+                            {
+                                blockChainHashNext = "0000000000000000000000000000000000000000";
+                            }
+                            else
+                            {
+                                blockChainHashNext = req.@params[0].ToString();
+                            }
+                            result = msq.GetBlock2TimeNext(blockChainHashNext);
+                        }
+                        else
+                        {
+                            result = msq.GetBlock2TimeNext("0000000000000000000000000000000000000000");
+                        }
+                        break;
                     case "getscriptmethod":
                         string chainhash = "";
                         if (req.@params.Length > 1)

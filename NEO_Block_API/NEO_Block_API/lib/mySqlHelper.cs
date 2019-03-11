@@ -2686,6 +2686,93 @@ namespace NEO_Block_API.lib
             }
 
         }
+
+        public JArray GetBlock2Time(string chainHash) {
+
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                JsonPRCresponse res = new JsonPRCresponse();
+                conn.Open();
+
+                string select = "select time,indexx from block_" + chainHash + " order by id desc LIMIT 51";
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+                long startTime = -1;
+                while (rdr.Read()) {
+                    var time = (rdr["time"]).ToString();
+                    var index = (rdr["indexx"]).ToString();
+                    long interval = startTime - long.Parse(time);
+
+                    if (startTime != -1)
+                    bk.Add(new JObject { { "blockinterval", interval }, { "blockindex", index } });
+
+                    startTime = long.Parse(time);
+                }
+                return res.result = bk;
+            }
+        }
+
+        public JArray GetBlock2TimeNext(string chainHash)
+        {
+
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                JsonPRCresponse res = new JsonPRCresponse();
+                conn.Open();
+
+                string select = "select time,indexx from block_" + chainHash + " order by id desc LIMIT 2";
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+                long startTime = -1;
+                while (rdr.Read())
+                {
+                    var time = (rdr["time"]).ToString();
+                    var index = (rdr["indexx"]).ToString();
+                    long interval = startTime - long.Parse(time);
+
+                    if (startTime != -1)
+                        bk.Add(new JObject { { "blockinterval", interval }, { "blockindex", index } });
+
+                    startTime = long.Parse(time);
+                }
+                return res.result = bk;
+            }
+        }
+
+        public JArray GetContractMessage(string chainHash, string contract) {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                JsonPRCresponse res = new JsonPRCresponse();
+                conn.Open();
+
+                string select = "select totalsupply, name, symbol, decimals from nep5asset_" + chainHash + " where assetid='" + contract + "'";
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+                long startTime = -1;
+                while (rdr.Read())
+                {
+                    var totalsupply = (rdr["totalsupply"]).ToString();
+                    var name = (rdr["name"]).ToString();
+                    var symbol = (rdr["symbol"]).ToString();
+                    var decimals = (rdr["decimals"]).ToString();
+
+                    bk.Add(new JObject { { "totalsupply", totalsupply }, { "name", name }, { "symbol", symbol }, { "decimals", decimals } });
+                }
+                return res.result = bk;
+            }
+        }
     }
 
 }
