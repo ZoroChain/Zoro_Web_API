@@ -1,25 +1,57 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using System.Data;
 using System.Text;
 using NEO_Block_API.RPC;
 using Newtonsoft.Json.Linq;
 using System.Data.SqlClient;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
+using System.Timers;
 
 namespace NEO_Block_API.lib
 {
 	public class mySqlHelper
 	{
         public static string conf = "";
+        private int height = 0;
+        private static ConcurrentDictionary<string,JArray> jArrays = new ConcurrentDictionary<string, JArray>();
+
+        public mySqlHelper() {
+            Timer timer = new Timer();
+            timer.Enabled = true;
+            timer.Interval = 1000;
+            timer.Start();
+            timer.Elapsed += new ElapsedEventHandler(getHeightChange); 
+        }
+
+        private void getHeightChange(object a, ElapsedEventArgs e) {
+            using (MySqlConnection conn = new MySqlConnection(conf)) {
+                conn.Open();
+                string select = "select indexx from block_0000000000000000000000000000000000000000 ORDER BY id DESC LIMIT 1";
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                int i = 0;
+                while (rdr.Read()) {
+                    string index = rdr["indexx"].ToString();
+                    i = int.Parse(index);
+                }
+                if (i != height) { 
+                    height = i;
+                    jArrays.Clear();
+                }
+                conn.Clone();
+            }
+        }
 
         public JArray GetAddress(JsonRPCrequest req)
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				conn.Open();
+                
 				var addr = req.@params[0].ToString();
 
 				string select = "select firstuse , lastuse , txcount from  address_0000000000000000000000000000000000000000 where addr = @addr";
@@ -37,9 +69,8 @@ namespace NEO_Block_API.lib
 					var tdata = (rdr["txcount"]).ToString();
 
 					 bk.Add(new JObject { { "firstuse", adata }, { "lastuse", ldata } , { "txcount", tdata } });
-				}				
+				}
 				return res.result = bk;
-
 			}
 		}
 
@@ -60,18 +91,12 @@ namespace NEO_Block_API.lib
                 MySqlDataReader rdr = cmd.ExecuteReader();
                 while (rdr.Read())
                 {
-
                     var adata = (rdr["firstuse"]).ToString();
                     var ldata = (rdr["lastuse"]).ToString();
                     var tdata = (rdr["txcount"]).ToString();
 
                     bk.Add(new JObject { { "firstuse", adata }, { "lastuse", ldata }, { "txcount", tdata } });
-
-
                 }
-
-
-
                 return res.result = bk;
 
             }
@@ -79,7 +104,12 @@ namespace NEO_Block_API.lib
 
         public JArray GetAddrs(JsonRPCrequest req)
 		{
-			JArray bk = new JArray();
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("addrs", out jArray))
+            {
+                return jArray;
+            }
+            JArray bk = new JArray();
 
 			using (MySqlConnection conn = new MySqlConnection(conf))
 			{
@@ -104,9 +134,9 @@ namespace NEO_Block_API.lib
 					bk.Add(new JObject { { "addr", adata } , { "firstDate",f } , { "lastDate", lu }, { "txcount", txc } });
 			
 				}
+                jArrays.AddOrUpdate("addrs", bk, (s, a) => { return a; });
 
-		
-				return res.result = bk;
+                return res.result = bk;
 
 			}
 
@@ -114,6 +144,11 @@ namespace NEO_Block_API.lib
 
         public JArray GetAppChainAddrs(JsonRPCrequest req)
         {
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("appchainaddrs" + req.@params[0], out jArray))
+            {
+                return jArray;
+            }
             JArray bk = new JArray();
 
             using (MySqlConnection conn = new MySqlConnection(conf))
@@ -140,7 +175,7 @@ namespace NEO_Block_API.lib
 
                 }
 
-
+                jArrays.AddOrUpdate("appchainaddrs" + req.@params[0], bk, (s, a) => { return a; });
                 return res.result = bk;
 
             }
@@ -150,7 +185,7 @@ namespace NEO_Block_API.lib
 
         public JArray GetAddr(JsonRPCrequest req)
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				conn.Open();
 
@@ -178,8 +213,7 @@ namespace NEO_Block_API.lib
 
 
                 }
-
-				return res.result = bk;
+                return res.result = bk;
 
 			}
 		}
@@ -214,7 +248,6 @@ namespace NEO_Block_API.lib
 
 
                 }
-
                 return res.result = bk;
 
             }
@@ -222,7 +255,12 @@ namespace NEO_Block_API.lib
 
         public JArray GetAddressTxs(JsonRPCrequest req)
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("addresstxs", out jArray))
+            {
+                return jArray;
+            }
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				conn.Open();
 				var addr = req.@params[0].ToString();
@@ -244,13 +282,19 @@ namespace NEO_Block_API.lib
 					var bi = (rdr["blockindex"]).ToString();
 					bk.Add(new JObject { { "addr", vdata } , { "txid", adata }, { "blockindex", bi }, { "blocktime", bt } });
 				}
-				return res.result = bk;
+                jArrays.AddOrUpdate("addresstxs", bk, (s, a) => { return a; });
+                return res.result = bk;
 
 			}
 		}
 
         public JArray GetAppChainAddressTxs(JsonRPCrequest req)
         {
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("appchainaddresstxs" + req.@params[0], out jArray))
+            {
+                return jArray;
+            }
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 conn.Open();
@@ -273,13 +317,19 @@ namespace NEO_Block_API.lib
                     var bi = (rdr["blockindex"]).ToString();
                     bk.Add(new JObject { { "addr", vdata }, { "txid", adata }, { "blockindex", bi }, { "blocktime", bt } });
                 }
+                jArrays.AddOrUpdate("appchainaddresstxs" + req.@params[0], bk, (s, a) => { return a; });
                 return res.result = bk;
             }
         }
 
         public JArray GetTxCount(JsonRPCrequest req)
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("txcount", out jArray))
+            {
+                return jArray;
+            }
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				conn.Open();
 				//var addr = req.@params[0].ToString();
@@ -308,8 +358,8 @@ namespace NEO_Block_API.lib
 
 						res.result = bk;
 					}
-
-					return res.result;
+                    jArrays.AddOrUpdate("txcount", res.result, (s, a) => { return a; });
+                    return res.result;
 				}
 				else {
 					string select = "select count(*) from tx where type='" + req.@params[0] + "'";
@@ -346,7 +396,12 @@ namespace NEO_Block_API.lib
 
         public JArray GetAppchainTxCount(JsonRPCrequest req)
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("appchaintxcount" + req.@params[0], out jArray))
+            {
+                return jArray;
+            }
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				conn.Open();
 				//var addr = req.@params[0].ToString();		
@@ -373,14 +428,14 @@ namespace NEO_Block_API.lib
 
 					res.result = bk;
 				}
-
-				return res.result;
+                jArrays.AddOrUpdate("appchaintxcount" + req.@params[0], res.result, (s, a) => { return a; });
+                return res.result;
 			}
 		}
 
 		public JArray GetRankByAssetCount(JsonRPCrequest req)
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				conn.Open();
 		
@@ -406,11 +461,8 @@ namespace NEO_Block_API.lib
 							   };
 
 						res.result = bk;
-					}
-
-
-
-					return res.result;
+					}                 
+                    return res.result;
 				}
 			}
 		}
@@ -449,7 +501,7 @@ namespace NEO_Block_API.lib
 
         public JArray GetRankByAsset(JsonRPCrequest req)
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				conn.Open();
 				
@@ -478,8 +530,7 @@ namespace NEO_Block_API.lib
 					   bk.Add(new JObject { { "asset", adata }, { "balance", bl } , { "addr", ad }  });
     	
 					}
-
-					return res.result = bk;
+                    return res.result = bk;
 				}
 			}
 		}
@@ -515,7 +566,6 @@ namespace NEO_Block_API.lib
                         bk.Add(new JObject { { "asset", adata }, { "balance", bl }, { "addr", ad } });
 
                     }
-
                     return res.result = bk;
                 }
             }
@@ -523,7 +573,12 @@ namespace NEO_Block_API.lib
 
         public JArray GetAddrCount(JsonRPCrequest req)
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("addrcount", out jArray))
+            {
+                return jArray;
+            }
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				conn.Open();
 
@@ -553,8 +608,8 @@ namespace NEO_Block_API.lib
 
 					res.result = bk;
 				}
-
-				return res.result;
+                jArrays.AddOrUpdate("addrcount", res.result, (s, a) => { return a; });
+                return res.result;
 
 			}
 		}
@@ -562,7 +617,12 @@ namespace NEO_Block_API.lib
 
 		public JArray GetAppchainAddrCount(JsonRPCrequest req)
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("appchainaddrcount" + req.@params[0], out jArray))
+            {
+                return jArray;
+            }
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				conn.Open();
 
@@ -592,14 +652,19 @@ namespace NEO_Block_API.lib
 
 					res.result = bk;
 				}
-
-				return res.result;
+                jArrays.AddOrUpdate("appchainaddrcount" + req.@params[0], res.result, (s, a) => { return a; });
+                return res.result;
 
 			}
 		}
 		public async Task<JArray> GetBalanceAsync(JsonRPCrequest req) // needs to be changed for the right balance data
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("balance" + req.@params[0], out jArray))
+            {
+                return jArray;
+            }
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				conn.Open();
 
@@ -626,13 +691,18 @@ namespace NEO_Block_API.lib
                     bk.Add(jObject);
 
 				}
-
-				return res.result = bk;
+                jArrays.AddOrUpdate("balance" + req.@params[0], bk, (s, a) => { return a; });
+                return res.result = bk;
 			}
 		}
 
         public async Task<JArray> GetAppChainBalanceAsync(JsonRPCrequest req) // needs to be changed for the right balance data
         {
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("appchainbalance" + req.@params[0] + req.@params[1], out jArray))
+            {
+                return jArray;
+            }
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 conn.Open();
@@ -653,30 +723,27 @@ namespace NEO_Block_API.lib
                     var jObject = new JObject();
                     if (type == "NativeNep5")
                     {
-                        jObject = await InvokeHelper.getNativeBalanceOfAsync("0000000000000000000000000000000000000000", asset, req.@params[0].ToString());
+                        jObject = await InvokeHelper.getNativeBalanceOfAsync(req.@params[0].ToString(), asset, req.@params[1].ToString());
                     }
                     else
                     {
-                        jObject = await InvokeHelper.getBalanceOfAsync("0000000000000000000000000000000000000000", asset, req.@params[0].ToString());
+                        jObject = await InvokeHelper.getBalanceOfAsync(req.@params[0].ToString(), asset, req.@params[1].ToString());
                     }
                     bk.Add(jObject);
 
                 }
 
-
+                jArrays.AddOrUpdate("appchainbalance" + req.@params[0] + req.@params[1], bk, (s, a) => { return a; });
                 return res.result = bk;
             }
         }
 
         public JArray GetAsset(JsonRPCrequest req)
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
-
-
 				conn.Open();
 			
-
 				string select = "select version , id , type , name , amount , available , pprecision , owner , admin, issuer , expiration , frozen  from  asset where id='" + req.@params[0] + "'";
 
 				MySqlCommand cmd = new MySqlCommand(select, conn);
@@ -687,7 +754,6 @@ namespace NEO_Block_API.lib
 
 				while (rdr.Read())
 				{
-
 					var adata = (rdr["version"]).ToString();
 					var idata = (rdr["id"]).ToString();
 					var tdata = (rdr["type"]).ToString();
@@ -706,60 +772,20 @@ namespace NEO_Block_API.lib
 
 
 				}
-
-				return res.result = bk;
-
-			}
-		}
-
-
-		
-		public JArray GetAllAsset(JsonRPCrequest req)
-		{
-			
-			using (MySqlConnection conn = new MySqlConnection(conf))
-			{
-				
-
-					conn.Open();
-			
-
-					string select = "select type ,name , amount, pprecision ,available ,owner, admin , id from asset";
-
-					JsonPRCresponse res = new JsonPRCresponse();
-					MySqlCommand cmd = new MySqlCommand(select, conn);
-				
-
-					MySqlDataReader rdr = cmd.ExecuteReader();
-					JArray bk = new JArray();
-					while (rdr.Read())
-					{
-					    var tdata = (rdr["type"]).ToString();
-					    var ndata = (rdr["name"]).ToString();
-					    var mdata = (rdr["amount"]).ToString();
-					    var pdata = (rdr["pprecision"]).ToString();
-					    var xdata = (rdr["available"]).ToString();  
-					    var odata = (rdr["owner"]).ToString();
-					    var o =     (rdr["admin"]).ToString();
-					    var adata = (rdr["id"]).ToString();
-
-
-
-					bk.Add(new JObject { { "type", tdata }, { "name", JArray.Parse(ndata) },{"amount" , mdata}, { "precision", pdata } , { "available", xdata }, { "owner", odata }, { "admin", o }, { "id", adata }});
-					}
-
-					return res.result = bk;
+                return res.result = bk;
 
 			}
 		}
 
 		public JArray GetAllAppchains(JsonRPCrequest req)
 		{
-
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("allappchains", out jArray))
+            {
+                return jArray;
+            }
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
-
-
 				conn.Open();
 
 
@@ -787,16 +813,19 @@ namespace NEO_Block_API.lib
 
 					bk.Add(new JObject { { "version", tdata }, { "hash", ndata }, { "name", mdata }, { "owner", pdata }, { "timestamp", xdata }, { "seedlist", JArray.Parse(odata) }, { "validators", JArray.Parse(o) } });
 				}
-
-				return res.result = bk;
-
+                jArrays.AddOrUpdate("allappchains", bk, (s, a) => { return a; });
+                return res.result = bk;
 			}
 		}
 
 		public JArray GetAppchain(JsonRPCrequest req)
 		{
-			
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("appchain" + req.@params[0], out jArray))
+            {
+                return jArray;
+            }
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 
 
@@ -834,15 +863,19 @@ namespace NEO_Block_API.lib
 
 					bk.Add(new JObject { { "version", tdata }, { "hash", ndata }, { "name", mdata }, { "owner", pdata }, { "timestamp", xdata }, { "seedlist", JArray.Parse(odata) }, { "validators", JArray.Parse(o) } });
 				}
-
-				return res.result = bk;
+                jArrays.AddOrUpdate("appchain" + req.@params[0], bk, (s, a) => { return a; });
+                return res.result = bk;
 
 			}
 		}
 		public JArray GetHashlist(JsonRPCrequest req)
 		{
-
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("hashlist", out jArray))
+            {
+                return jArray;
+            }
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 
 				conn.Open();
@@ -861,15 +894,15 @@ namespace NEO_Block_API.lib
 					
 					bk.Add(new JObject { { "hashlist", tdata } });
 				}
-
-				return res.result = bk;
+                jArrays.AddOrUpdate("hashlist", bk, (s, a) => { return a; });
+                return res.result = bk;
 
 			}
 		}
 
 		public JArray GetBlock(JsonRPCrequest req)
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				JsonPRCresponse res = new JsonPRCresponse();
 				conn.Open();
@@ -904,18 +937,13 @@ namespace NEO_Block_API.lib
 					
 					bk.Add(new JObject { { "hash", hash }, { "size", sdata }, { "version", adata }, { "previousblockhash", pdata }, { "merkleroot", mdata }, { "time", tdata }, { "index", ind }, { "nonce", ndata }, { "nextconsensus", nc } , { "script",JObject.Parse(s) }, { "tx", JArray.Parse(tx) } });
 				}
-			
-
-				return res.result = bk;
-
-
-
+                return res.result = bk;
 			}
 		}
 
 		public JArray GetAppChainBlock(JsonRPCrequest req)
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				JsonPRCresponse res = new JsonPRCresponse();
 				conn.Open();
@@ -950,19 +978,19 @@ namespace NEO_Block_API.lib
 
 					bk.Add(new JObject { { "hash", hash }, { "size", sdata }, { "version", adata }, { "previousblockhash", pdata }, { "merkleroot", mdata }, { "time", tdata }, { "index", ind }, { "nonce", ndata }, { "nextconsensus", nc }, { "script", JObject.Parse(s) }, { "tx", JArray.Parse(tx) } });
 				}
-
-
-				return res.result = bk;
-
-
-
+                return res.result = bk;
 			}
 		}
 
 
 		public JArray GetBlocks(JsonRPCrequest req)
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("blocks", out jArray))
+            {
+                return jArray;
+            }
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				JsonPRCresponse res = new JsonPRCresponse();
 				conn.Open();
@@ -988,18 +1016,20 @@ namespace NEO_Block_API.lib
 
 					bk.Add(new JObject { { "size", sdata }, { "hash", hash }, { "index", ind }, { "time", tdata }, {"txcount", txcount } });
 				}
-
-				return res.result = bk;
-
-
-
+                jArrays.AddOrUpdate("blocks", bk, (s, a) => { return a; });
+                return res.result = bk;
 			}
 		}
 
 
 		public JArray GetAppchainBlocks(JsonRPCrequest req)
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("appchainblocks" + req.@params[0], out jArray))
+            {
+                return jArray;
+            }
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				JsonPRCresponse res = new JsonPRCresponse();
 				conn.Open();
@@ -1033,8 +1063,8 @@ namespace NEO_Block_API.lib
 
 					bk.Add(new JObject { { "size", sdata }, { "version", adata }, { "hash", hash }, { "previousblockhash", pdata }, { "index", ind }, { "merkleroot", mdata }, { "time", tdata }, { "nonce", ndata }, { "nextconsensus", nc }, { "script", s }, { "tx", JArray.Parse(tx) } });
 				}
-
-				return res.result = bk;
+                jArrays.AddOrUpdate("appchainblocks" + req.@params[0], bk, (s, a) => { return a; });
+                return res.result = bk;
 
 
 
@@ -1043,6 +1073,11 @@ namespace NEO_Block_API.lib
 
         public JArray GetBlocksDESC(JsonRPCrequest req)
         {
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("blocksdesc", out jArray))
+            {
+                return jArray;
+            }
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 JsonPRCresponse res = new JsonPRCresponse();
@@ -1076,17 +1111,19 @@ namespace NEO_Block_API.lib
 
                     bk.Add(new JObject { { "size", sdata }, { "version", adata }, { "hash", hash }, { "previousblockhash", pdata }, { "index", ind }, { "merkleroot", mdata }, { "time", tdata }, { "nonce", ndata }, { "nextconsensus", nc }, { "script", s }, { "tx", JArray.Parse(tx) } });
                 }
-
+                jArrays.AddOrUpdate("blocksdesc", bk, (s, a) => { return a; });
                 return res.result = bk;
-
-
-
             }
         }
 
 
         public JArray GetAppchainBlocksDESC(JsonRPCrequest req)
         {
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("appchainblocksdesc" + req.@params[0], out jArray))
+            {
+                return jArray;
+            }
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 JsonPRCresponse res = new JsonPRCresponse();
@@ -1121,17 +1158,14 @@ namespace NEO_Block_API.lib
 
                     bk.Add(new JObject { { "size", sdata }, { "version", adata }, { "hash", hash }, { "previousblockhash", pdata }, { "index", ind }, { "merkleroot", mdata }, { "time", tdata }, { "nonce", ndata }, { "nextconsensus", nc }, { "script", s }, { "tx", JArray.Parse(tx) } });
                 }
-
+                jArrays.AddOrUpdate("appchainblocksdesc" + req.@params[0], bk, (s, a) => { return a; });
                 return res.result = bk;
-
-
-
             }
         }
 
         public JArray GetNep5Asset(JsonRPCrequest req)
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				conn.Open();
 
@@ -1161,10 +1195,7 @@ namespace NEO_Block_API.lib
 
 					bk.Add(new JObject { { "assetid", adata }, { "totalsupply", ts }, { "name", name }, { "symbol", sb }, { "decimals", cd } });
 				}
-
-				return res.result = bk;
-
-
+                return res.result = bk;
 			}
 		}
 
@@ -1189,27 +1220,24 @@ namespace NEO_Block_API.lib
 
                     var ts = (rdr["totalsupply"]).ToString();
 
-
                     var sb = (rdr["symbol"]).ToString();
 
                     var cd = (rdr["decimals"]).ToString();
 
-
-
-
-
                     bk.Add(new JObject { { "assetid", adata }, { "totalsupply", ts }, { "name", name }, { "symbol", sb }, { "decimals", cd } });
                 }
-
                 return res.result = bk;
-
-
             }
         }
 
         public JArray GetAllNep5Asset(JsonRPCrequest req)
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("allnep5asset", out jArray))
+            {
+                return jArray;
+            }
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				conn.Open();
 
@@ -1241,13 +1269,18 @@ namespace NEO_Block_API.lib
                     bk.Add(new JObject { {"assetid", adata } , { "totalsupply", ts }, { "name", name }, { "symbol", sb } , { "decimals", cd } });
 
 				}
-				return res.result = bk;
-
+                jArrays.AddOrUpdate("allnep5asset", bk, (s, a) => { return a; });
+                return res.result = bk;
 			}
 
 		}
 
         public JArray GetNep5AssetByAddress(string chainHash, string address) {
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("nep5assetbyaddress" + chainHash, out jArray))
+            {
+                return jArray;
+            }
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 conn.Open();
@@ -1272,6 +1305,7 @@ namespace NEO_Block_API.lib
                     bk.Add(new JObject { { "assetid", assetid }, { "type", type } });
 
                 }
+                jArrays.AddOrUpdate("nep5assetbyaddress" + chainHash, bk, (s, a) => { return a; });
                 return res.result = bk;
 
             }
@@ -1279,6 +1313,11 @@ namespace NEO_Block_API.lib
 
         public JArray GetAllNep5AssetByChainHash(JsonRPCrequest req)
         {
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("allnep5assetbychainhash" + req.@params[0], out jArray))
+            {
+                return jArray;
+            }
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 conn.Open();
@@ -1311,14 +1350,19 @@ namespace NEO_Block_API.lib
                     bk.Add(new JObject { { "assetid", adata }, { "totalsupply", ts }, { "name", name }, { "symbol", sb }, { "decimals", cd } });
 
                 }
+                jArrays.AddOrUpdate("allnep5assetbychainhash" + req.@params[0], bk, (s, a) => { return a; });
                 return res.result = bk;
 
             }
-
         }
 
         public JArray GetNep5TranferFromToAddress(string chainHash, string toAddress)
         {
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("nep5transferfromtoaddress" + chainHash + toAddress, out jArray))
+            {
+                return jArray;
+            }
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 conn.Open();
@@ -1354,13 +1398,12 @@ namespace NEO_Block_API.lib
 
                     bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata } });
                 }
-
+                jArrays.AddOrUpdate("nep5transferfromtoaddress" + chainHash + toAddress, bk, (s, a) => { return a; });
                 return res.result;
             }
         }
 
-        public JArray GetScriptMethod(string chainhash, string txid) {
-
+        public JArray GetScriptMethod(string chainhash, string txid) {           
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
 
@@ -1391,7 +1434,12 @@ namespace NEO_Block_API.lib
 
         public JArray GetNep5Transfer(JsonRPCrequest req)
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("nep5transfer", out jArray))
+            {
+                return jArray;
+            }
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 
 				conn.Open();
@@ -1418,7 +1466,7 @@ namespace NEO_Block_API.lib
 
                     bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata } });
                 }
-
+                jArrays.AddOrUpdate("nep5transfer", bk, (s, a) => { return a; });
                 return res.result = bk;
 
 			}
@@ -1426,6 +1474,11 @@ namespace NEO_Block_API.lib
 
         public JArray GetAppChainNep5Transfer(JsonRPCrequest req)
         {
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("nep5transfer" + req.@params[0], out jArray))
+            {
+                return jArray;
+            }
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
 
@@ -1459,7 +1512,7 @@ namespace NEO_Block_API.lib
 
                     bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata } });
                 }
-
+                jArrays.AddOrUpdate("nep5transfer" + req.@params[0], bk, (s, a) => { return a; });
                 return res.result = bk;
 
             }
@@ -2196,7 +2249,12 @@ namespace NEO_Block_API.lib
 
         public JArray GetRawTransactions(JsonRPCrequest req)  // needs a sorting by txtype miner , reg or issue
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("rawtransactions", out jArray))
+            {
+                return jArray;
+            }
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				conn.Open();
 
@@ -2220,7 +2278,8 @@ namespace NEO_Block_API.lib
 
 					bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
 				}
-				return res.result = bk;				
+                jArrays.AddOrUpdate("rawtransactions", bk, (s, a) => { return a; });
+                return res.result = bk;				
 			}
 
 		}
@@ -2228,7 +2287,12 @@ namespace NEO_Block_API.lib
 
 		public JArray GetAppchainRawTransactions(JsonRPCrequest req)  // needs a sorting by txtype miner , reg or issue
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("rawtransactions" + req.@params[0], out jArray))
+            {
+                return jArray;
+            }
+            using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				conn.Open();
 				string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_" + req.@params[0]+ " where type='InvocationTransaction' limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString());
@@ -2257,13 +2321,19 @@ namespace NEO_Block_API.lib
 
                     bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
 				}
-				return res.result = bk;
+                jArrays.AddOrUpdate("rawtransactions" + req.@params[0], bk, (s, a) => { return a; });
+                return res.result = bk;
 			}
 
 		}
 
         public JArray GetRawTransactionsDESC(JsonRPCrequest req)  // needs a sorting by txtype miner , reg or issue
         {
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("rawtransactionsdesc", out jArray))
+            {
+                return jArray;
+            }
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 conn.Open();
@@ -2293,6 +2363,7 @@ namespace NEO_Block_API.lib
 
                     bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
                 }
+                jArrays.AddOrUpdate("rawtransactionsdesc", bk, (s, a) => { return a; });
                 return res.result = bk;
             }
 
@@ -2301,6 +2372,11 @@ namespace NEO_Block_API.lib
 
         public JArray GetAppchainRawTransactionsDESC(JsonRPCrequest req)  // needs a sorting by txtype miner , reg or issue
         {
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("rawtransactionsdesc" + req.@params[0], out jArray))
+            {
+                return jArray;
+            }
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 conn.Open();
@@ -2330,6 +2406,7 @@ namespace NEO_Block_API.lib
 
                     bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
                 }
+                jArrays.AddOrUpdate("rawtransactionsdesc" + req.@params[0], bk, (s, a) => { return a; });
                 return res.result = bk;
             }
 
@@ -2687,14 +2764,14 @@ namespace NEO_Block_API.lib
 
         }
 
-        public JArray GetBlock2Time(string chainHash) {
+        public JArray GetBlock2Time(string chainHash, int length) {
 
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 JsonPRCresponse res = new JsonPRCresponse();
                 conn.Open();
 
-                string select = "select time,indexx from block_" + chainHash + " order by id desc LIMIT 51";
+                string select = "select time,indexx from block_" + chainHash + " order by id desc LIMIT " + (length + 1);
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -2718,7 +2795,11 @@ namespace NEO_Block_API.lib
 
         public JArray GetBlock2TimeNext(string chainHash)
         {
-
+            JArray jArray = new JArray();
+            if (jArrays.TryGetValue("block2time" + chainHash, out jArray))
+            {
+                return jArray;
+            }
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 JsonPRCresponse res = new JsonPRCresponse();
@@ -2743,6 +2824,7 @@ namespace NEO_Block_API.lib
 
                     startTime = long.Parse(time);
                 }
+                jArrays.AddOrUpdate("block2time" + chainHash, bk, (s, a) => { return a; });
                 return res.result = bk;
             }
         }

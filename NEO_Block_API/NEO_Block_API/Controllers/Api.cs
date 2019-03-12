@@ -349,6 +349,7 @@ namespace NEO_Block_API.Controllers
                         break;
                     case "getblockinterval":
                         string blockChainHash = "";
+                        string length = "";
                         if (req.@params.Length > 1)
                         {
                             if (req.@params[0].ToString() == "")
@@ -359,11 +360,13 @@ namespace NEO_Block_API.Controllers
                             {
                                 blockChainHash = req.@params[0].ToString();
                             }
-                            result = msq.GetBlock2Time(blockChainHash);
+                            length = req.@params[1].ToString();
+                            result = msq.GetBlock2Time(blockChainHash, int.Parse(length));
                         }
                         else
                         {
-                            result = msq.GetBlock2Time("0000000000000000000000000000000000000000");
+                            length = req.@params[0].ToString();
+                            result = msq.GetBlock2Time("0000000000000000000000000000000000000000", int.Parse(length));
                         }                       
                         break;
                     case "getblockintervalnext":
