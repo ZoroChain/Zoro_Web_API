@@ -2779,15 +2779,17 @@ namespace NEO_Block_API.lib
 
                 JArray bk = new JArray();
                 long startTime = -1;
+                int blockindex = -1;
                 while (rdr.Read()) {
                     var time = (rdr["time"]).ToString();
                     var index = (rdr["indexx"]).ToString();
                     long interval = startTime - long.Parse(time);
 
                     if (startTime != -1)
-                    bk.Add(new JObject { { "blockinterval", interval }, { "blockindex", index } });
+                    bk.Add(new JObject { { "blockinterval", interval }, { "blockindex", blockindex } });
 
                     startTime = long.Parse(time);
+                    blockindex = int.Parse(index);
                 }
                 return res.result = bk;
             }
@@ -2813,6 +2815,7 @@ namespace NEO_Block_API.lib
 
                 JArray bk = new JArray();
                 long startTime = -1;
+                int blockindex = -1;
                 while (rdr.Read())
                 {
                     var time = (rdr["time"]).ToString();
@@ -2820,9 +2823,10 @@ namespace NEO_Block_API.lib
                     long interval = startTime - long.Parse(time);
 
                     if (startTime != -1)
-                        bk.Add(new JObject { { "blockinterval", interval }, { "blockindex", index } });
+                        bk.Add(new JObject { { "blockinterval", interval }, { "blockindex", blockindex } });
 
                     startTime = long.Parse(time);
+                    blockindex = int.Parse(index);
                 }
                 jArrays.AddOrUpdate("block2time" + chainHash, bk, (s, a) => { return a; });
                 return res.result = bk;
