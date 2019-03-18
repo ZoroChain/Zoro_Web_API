@@ -1035,7 +1035,7 @@ namespace NEO_Block_API.lib
 				conn.Open();
 
 
-				string select = "select  size , version, hash , previousblockhash , merkleroot , time , indexx , nonce , nextconsensus , script ,tx from block_" + req.@params[0] +" limit "+(int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString()); 
+				string select = "select size , hash , time , indexx, txcount from block_" + req.@params[0] +" limit "+(int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString()); 
 
 				MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1047,22 +1047,14 @@ namespace NEO_Block_API.lib
 				while (rdr.Read())
 				{
 
-					var sdata = (rdr["size"]).ToString();
-					var adata = (rdr["version"]).ToString();
-					var hash = (rdr["hash"]).ToString();
-					var pdata = (rdr["previousblockhash"]).ToString();
-					var ind = (rdr["indexx"]).ToString();
-					var mdata = (rdr["merkleroot"]).ToString();
-					var tdata = (rdr["time"]).ToString();
-					var ndata = (rdr["nonce"]).ToString();
-					var nc = (rdr["nextconsensus"]).ToString();
-				
-					var s = (rdr["script"]).ToString();
-					var tx = (rdr["tx"]).ToString();
+                    var sdata = (rdr["size"]).ToString();
+                    var hash = (rdr["hash"]).ToString();
+                    var ind = (rdr["indexx"]).ToString();
+                    var tdata = (rdr["time"]).ToString();
+                    var txcount = (rdr["txcount"]).ToString();
 
-
-					bk.Add(new JObject { { "size", sdata }, { "version", adata }, { "hash", hash }, { "previousblockhash", pdata }, { "index", ind }, { "merkleroot", mdata }, { "time", tdata }, { "nonce", ndata }, { "nextconsensus", nc }, { "script", s }, { "tx", JArray.Parse(tx) } });
-				}
+                    bk.Add(new JObject { { "size", sdata }, { "hash", hash }, { "index", ind }, { "time", tdata }, { "txcount", txcount } });
+                }
                 jArrays.AddOrUpdate("appchainblocks" + req.@params[0], bk, (s, a) => { return a; });
                 return res.result = bk;
 
@@ -1084,7 +1076,7 @@ namespace NEO_Block_API.lib
                 conn.Open();
 
 
-                string select = "select  size , version, hash , previousblockhash , merkleroot , time , indexx , nonce , nextconsensus , script ,tx  from block_0000000000000000000000000000000000000000 ORDER BY id DESC limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
+                string select = "select size , hash , time , indexx, txcount  from block_0000000000000000000000000000000000000000 ORDER BY id DESC limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1097,19 +1089,12 @@ namespace NEO_Block_API.lib
                 {
 
                     var sdata = (rdr["size"]).ToString();
-                    var adata = (rdr["version"]).ToString();
                     var hash = (rdr["hash"]).ToString();
-                    var pdata = (rdr["previousblockhash"]).ToString();
                     var ind = (rdr["indexx"]).ToString();
-                    var mdata = (rdr["merkleroot"]).ToString();
                     var tdata = (rdr["time"]).ToString();
-                    var ndata = (rdr["nonce"]).ToString();
-                    var nc = (rdr["nextconsensus"]).ToString();
-                    var s = (rdr["script"]).ToString();
-                    var tx = (rdr["tx"]).ToString();
+                    var txcount = (rdr["txcount"]).ToString();
 
-
-                    bk.Add(new JObject { { "size", sdata }, { "version", adata }, { "hash", hash }, { "previousblockhash", pdata }, { "index", ind }, { "merkleroot", mdata }, { "time", tdata }, { "nonce", ndata }, { "nextconsensus", nc }, { "script", s }, { "tx", JArray.Parse(tx) } });
+                    bk.Add(new JObject { { "size", sdata }, { "hash", hash }, { "index", ind }, { "time", tdata }, { "txcount", txcount } });
                 }
                 jArrays.AddOrUpdate("blocksdesc", bk, (s, a) => { return a; });
                 return res.result = bk;
@@ -1130,7 +1115,7 @@ namespace NEO_Block_API.lib
                 conn.Open();
 
 
-                string select = "select  size , version, hash , previousblockhash , merkleroot , time , indexx , nonce , nextconsensus , script ,tx from block_" + req.@params[0] + " ORDER BY id DESC limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString());
+                string select = "select  size , hash , time , indexx, txcount from block_" + req.@params[0] + " ORDER BY id DESC limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString());
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1143,20 +1128,12 @@ namespace NEO_Block_API.lib
                 {
 
                     var sdata = (rdr["size"]).ToString();
-                    var adata = (rdr["version"]).ToString();
                     var hash = (rdr["hash"]).ToString();
-                    var pdata = (rdr["previousblockhash"]).ToString();
                     var ind = (rdr["indexx"]).ToString();
-                    var mdata = (rdr["merkleroot"]).ToString();
                     var tdata = (rdr["time"]).ToString();
-                    var ndata = (rdr["nonce"]).ToString();
-                    var nc = (rdr["nextconsensus"]).ToString();
+                    var txcount = (rdr["txcount"]).ToString();
 
-                    var s = (rdr["script"]).ToString();
-                    var tx = (rdr["tx"]).ToString();
-
-
-                    bk.Add(new JObject { { "size", sdata }, { "version", adata }, { "hash", hash }, { "previousblockhash", pdata }, { "index", ind }, { "merkleroot", mdata }, { "time", tdata }, { "nonce", ndata }, { "nextconsensus", nc }, { "script", s }, { "tx", JArray.Parse(tx) } });
+                    bk.Add(new JObject { { "size", sdata }, { "hash", hash }, { "index", ind }, { "time", tdata }, { "txcount", txcount } });
                 }
                 jArrays.AddOrUpdate("appchainblocksdesc" + req.@params[0], bk, (s, a) => { return a; });
                 return res.result = bk;
