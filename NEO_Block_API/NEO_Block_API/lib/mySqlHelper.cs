@@ -2748,7 +2748,7 @@ namespace NEO_Block_API.lib
                 JsonPRCresponse res = new JsonPRCresponse();
                 conn.Open();
 
-                string select = "select time,indexx from block_" + chainHash + " order by id desc LIMIT " + (length + 1);
+                string select = "select time,indexx from block_" + chainHash + " order by indexx desc LIMIT " + (length + 1);
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -2784,7 +2784,7 @@ namespace NEO_Block_API.lib
                 JsonPRCresponse res = new JsonPRCresponse();
                 conn.Open();
 
-                string select = "select time,indexx from block_" + chainHash + " order by id desc LIMIT 2";
+                string select = "select time,indexx from block_" + chainHash + " order by indexx desc LIMIT 2";
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
