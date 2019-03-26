@@ -102,6 +102,12 @@ namespace NEO_Block_API.Controllers
                     case "getappchainblocksdesc":
                         result = msq.GetAppchainBlocksDESC(req);
                         break;
+                    case "getblocksdesccache":
+                        result = msq.GetBlocksDESCCache(req);
+                        break;
+                    case "getappchainblocksdesccache":
+                        result = msq.GetAppchainBlocksDESCCache(req);
+                        break;
                     #endregion
                     #region 获取block from hash
                     case "getblockfromhash":
@@ -187,6 +193,12 @@ namespace NEO_Block_API.Controllers
                         break;
                     case "getappchainrawtransactionsdesc":
                         result = msq.GetAppchainRawTransactionsDESC(req);
+                        break;
+                    case "getrawtransactionsdesccache":
+                        result = msq.GetRawTransactionsDESCCache(req);
+                        break;
+                    case "getappchainrawtransactionsdesccache":
+                        result = msq.GetAppchainRawTransactionsDESCCache(req);
                         break;
                     #endregion
                     #region 获取allnep5asset

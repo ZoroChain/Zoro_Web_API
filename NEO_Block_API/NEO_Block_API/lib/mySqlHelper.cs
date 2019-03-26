@@ -1065,6 +1065,71 @@ namespace NEO_Block_API.lib
 
         public JArray GetBlocksDESC(JsonRPCrequest req)
         {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                JsonPRCresponse res = new JsonPRCresponse();
+                conn.Open();
+
+
+                string select = "select size , hash , time , indexx, txcount  from block_0000000000000000000000000000000000000000 ORDER BY id DESC limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+
+                while (rdr.Read())
+                {
+
+                    var sdata = (rdr["size"]).ToString();
+                    var hash = (rdr["hash"]).ToString();
+                    var ind = (rdr["indexx"]).ToString();
+                    var tdata = (rdr["time"]).ToString();
+                    var txcount = (rdr["txcount"]).ToString();
+
+                    bk.Add(new JObject { { "size", sdata }, { "hash", hash }, { "index", ind }, { "time", tdata }, { "txcount", txcount } });
+                }
+                return res.result = bk;
+            }
+        }
+
+
+        public JArray GetAppchainBlocksDESC(JsonRPCrequest req)
+        {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                JsonPRCresponse res = new JsonPRCresponse();
+                conn.Open();
+
+
+                string select = "select  size , hash , time , indexx, txcount from block_" + req.@params[0] + " ORDER BY id DESC limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString());
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+
+                while (rdr.Read())
+                {
+
+                    var sdata = (rdr["size"]).ToString();
+                    var hash = (rdr["hash"]).ToString();
+                    var ind = (rdr["indexx"]).ToString();
+                    var tdata = (rdr["time"]).ToString();
+                    var txcount = (rdr["txcount"]).ToString();
+
+                    bk.Add(new JObject { { "size", sdata }, { "hash", hash }, { "index", ind }, { "time", tdata }, { "txcount", txcount } });
+                }
+                return res.result = bk;
+            }
+        }
+
+        public JArray GetBlocksDESCCache(JsonRPCrequest req)
+        {
             JArray jArray = new JArray();
             if (jArrays.TryGetValue("blocksdesc", out jArray))
             {
@@ -1102,7 +1167,7 @@ namespace NEO_Block_API.lib
         }
 
 
-        public JArray GetAppchainBlocksDESC(JsonRPCrequest req)
+        public JArray GetAppchainBlocksDESCCache(JsonRPCrequest req)
         {
             JArray jArray = new JArray();
             if (jArrays.TryGetValue("appchainblocksdesc" + req.@params[0], out jArray))
@@ -2306,6 +2371,79 @@ namespace NEO_Block_API.lib
 
         public JArray GetRawTransactionsDESC(JsonRPCrequest req)  // needs a sorting by txtype miner , reg or issue
         {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();
+
+                string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_0000000000000000000000000000000000000000 where type='InvocationTransaction' order by id desc limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                JsonPRCresponse res = new JsonPRCresponse();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+                while (rdr.Read())
+                {
+                    var adata = (rdr["txid"]).ToString();
+                    var size = int.Parse((rdr["size"]).ToString());
+                    var type = (rdr["type"]).ToString();
+                    var vs = (rdr["version"]).ToString();
+                    var bdata = (rdr["blockheight"]).ToString();
+                    var sdata = int.Parse((rdr["sys_fee"]).ToString());
+
+                    if (type == "MinerTransaction")
+                    {
+                        continue;
+                    }
+
+                    bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
+                }
+                return res.result = bk;
+            }
+
+        }
+
+
+        public JArray GetAppchainRawTransactionsDESC(JsonRPCrequest req)  // needs a sorting by txtype miner , reg or issue
+        {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();
+                string select = "select txid ,size, type ,version, blockheight, sys_fee from tx_" + req.@params[0] + " where type='InvocationTransaction' order by id desc limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + int.Parse(req.@params[1].ToString());
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                JsonPRCresponse res = new JsonPRCresponse();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+                while (rdr.Read())
+                {
+
+                    var adata = (rdr["txid"]).ToString();
+                    var size = int.Parse((rdr["size"]).ToString());
+                    var type = (rdr["type"]).ToString();
+                    var vs = (rdr["version"]).ToString();
+                    var bdata = (rdr["blockheight"]).ToString();
+                    var sdata = int.Parse((rdr["sys_fee"]).ToString());
+
+                    if (type == "MinerTransaction")
+                    {
+                        continue;
+                    }
+
+                    bk.Add(new JObject { { "txid", adata }, { "size", size }, { "type", type }, { "version", vs }, { "blockindex", bdata }, { "gas", sdata } }); //
+                }
+                return res.result = bk;
+            }
+
+        }
+
+        public JArray GetRawTransactionsDESCCache(JsonRPCrequest req)  // needs a sorting by txtype miner , reg or issue
+        {
             JArray jArray = new JArray();
             if (jArrays.TryGetValue("rawtransactionsdesc", out jArray))
             {
@@ -2347,7 +2485,7 @@ namespace NEO_Block_API.lib
         }
 
 
-        public JArray GetAppchainRawTransactionsDESC(JsonRPCrequest req)  // needs a sorting by txtype miner , reg or issue
+        public JArray GetAppchainRawTransactionsDESCCache(JsonRPCrequest req)  // needs a sorting by txtype miner , reg or issue
         {
             JArray jArray = new JArray();
             if (jArrays.TryGetValue("rawtransactionsdesc" + req.@params[0], out jArray))
