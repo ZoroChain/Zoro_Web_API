@@ -173,7 +173,7 @@ namespace NEO_Block_API.Controllers
                         result = msq.GetAppChainTransaction(req);
                         break;
                     #endregion
-                    #region 获取transaction
+                    #region 获取transaction_ex
                     case "gettransactions_ex":
                         result = msq.GetTransactions_EX(req);
                         break;
@@ -282,7 +282,7 @@ namespace NEO_Block_API.Controllers
                         break;
                     case "getappchainrankbyasset":
                         result = msq.GetAppChainRankByAsset(req);
-                        break;
+                        break;                   
                     #endregion
                     #region 获取rankbyassetcount
                     case "getrankbyassetcount":
@@ -357,6 +357,36 @@ namespace NEO_Block_API.Controllers
                                 contract = "0x" + contract;
                             }
                             result = msq.GetContractMessage("0000000000000000000000000000000000000000", contract);
+                        }
+                        break;
+                    case "getcontractstatemessage":
+                        string stateChainHash = "";
+                        string state = "";
+                        if (req.@params.Length > 1)
+                        {
+                            if (req.@params[0].ToString() == "")
+                            {
+                                stateChainHash = "0000000000000000000000000000000000000000";
+                            }
+                            else
+                            {
+                                stateChainHash = req.@params[0].ToString();
+                            }
+                            state = req.@params[1].ToString();
+                            if (!state.StartsWith("0x"))
+                            {
+                                state = "0x" + state;
+                            }
+                            result = msq.GetContractState(stateChainHash, state);
+                        }
+                        else
+                        {
+                            state = req.@params[0].ToString();
+                            if (!state.StartsWith("0x"))
+                            {
+                                state = "0x" + state;
+                            }
+                            result = msq.GetContractState("0000000000000000000000000000000000000000", state);
                         }
                         break;
                     case "getblockinterval":

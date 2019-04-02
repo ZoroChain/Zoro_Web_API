@@ -104,11 +104,6 @@ namespace NEO_Block_API.lib
 
         public JArray GetAddrs(JsonRPCrequest req)
 		{
-            JArray jArray = new JArray();
-            if (jArrays.TryGetValue("addrs", out jArray))
-            {
-                return jArray;
-            }
             JArray bk = new JArray();
 
 			using (MySqlConnection conn = new MySqlConnection(conf))
@@ -134,7 +129,6 @@ namespace NEO_Block_API.lib
 					bk.Add(new JObject { { "addr", adata } , { "firstDate",f } , { "lastDate", lu }, { "txcount", txc } });
 			
 				}
-                jArrays.AddOrUpdate("addrs", bk, (s, a) => { return a; });
 
                 return res.result = bk;
 
@@ -144,11 +138,6 @@ namespace NEO_Block_API.lib
 
         public JArray GetAppChainAddrs(JsonRPCrequest req)
         {
-            JArray jArray = new JArray();
-            if (jArrays.TryGetValue("appchainaddrs" + req.@params[0], out jArray))
-            {
-                return jArray;
-            }
             JArray bk = new JArray();
 
             using (MySqlConnection conn = new MySqlConnection(conf))
@@ -174,8 +163,6 @@ namespace NEO_Block_API.lib
                     bk.Add(new JObject { { "addr", adata }, { "firstDate", f }, { "lastDate", lu }, { "txcount", txc } });
 
                 }
-
-                jArrays.AddOrUpdate("appchainaddrs" + req.@params[0], bk, (s, a) => { return a; });
                 return res.result = bk;
 
             }
@@ -255,17 +242,12 @@ namespace NEO_Block_API.lib
 
         public JArray GetAddressTxs(JsonRPCrequest req)
 		{
-            JArray jArray = new JArray();
-            if (jArrays.TryGetValue("addresstxs", out jArray))
-            {
-                return jArray;
-            }
             using (MySqlConnection conn = new MySqlConnection(conf))
 			{
 				conn.Open();
 				var addr = req.@params[0].ToString();
 
-				string select = "select txid,addr,blocktime,blockindex from address_tx_0000000000000000000000000000000000000000 where @addr = addr limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + req.@params[1];
+				string select = "select txid,addr,blocktime,blockindex from address_tx_0000000000000000000000000000000000000000 where @addr = addr order by blockindex desc limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + req.@params[1];
 
 				JsonPRCresponse res = new JsonPRCresponse();
 				MySqlCommand cmd = new MySqlCommand(select, conn);
@@ -282,7 +264,6 @@ namespace NEO_Block_API.lib
 					var bi = (rdr["blockindex"]).ToString();
 					bk.Add(new JObject { { "addr", vdata } , { "txid", adata }, { "blockindex", bi }, { "blocktime", bt } });
 				}
-                jArrays.AddOrUpdate("addresstxs", bk, (s, a) => { return a; });
                 return res.result = bk;
 
 			}
@@ -290,17 +271,12 @@ namespace NEO_Block_API.lib
 
         public JArray GetAppChainAddressTxs(JsonRPCrequest req)
         {
-            JArray jArray = new JArray();
-            if (jArrays.TryGetValue("appchainaddresstxs" + req.@params[0], out jArray))
-            {
-                return jArray;
-            }
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 conn.Open();
                 var addr = req.@params[1].ToString();
 
-                string select = "select txid,addr,blocktime,blockindex from address_tx_" + req.@params[0].ToString() + " where @addr = addr limit " + (int.Parse(req.@params[2].ToString()) * int.Parse(req.@params[3].ToString())) + ", " + req.@params[2];
+                string select = "select txid,addr,blocktime,blockindex from address_tx_" + req.@params[0].ToString() + " where @addr = addr order by blockindex desc limit " + (int.Parse(req.@params[2].ToString()) * int.Parse(req.@params[3].ToString())) + ", " + req.@params[2];
 
                 JsonPRCresponse res = new JsonPRCresponse();
                 MySqlCommand cmd = new MySqlCommand(select, conn);
@@ -317,7 +293,6 @@ namespace NEO_Block_API.lib
                     var bi = (rdr["blockindex"]).ToString();
                     bk.Add(new JObject { { "addr", vdata }, { "txid", adata }, { "blockindex", bi }, { "blocktime", bt } });
                 }
-                jArrays.AddOrUpdate("appchainaddresstxs" + req.@params[0], bk, (s, a) => { return a; });
                 return res.result = bk;
             }
         }
@@ -1318,11 +1293,6 @@ namespace NEO_Block_API.lib
 		}
 
         public JArray GetNep5AssetByAddress(string chainHash, string address) {
-            JArray jArray = new JArray();
-            if (jArrays.TryGetValue("nep5assetbyaddress" + chainHash, out jArray))
-            {
-                return jArray;
-            }
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 conn.Open();
@@ -1347,7 +1317,6 @@ namespace NEO_Block_API.lib
                     bk.Add(new JObject { { "assetid", assetid }, { "type", type } });
 
                 }
-                jArrays.AddOrUpdate("nep5assetbyaddress" + chainHash, bk, (s, a) => { return a; });
                 return res.result = bk;
 
             }
@@ -1400,11 +1369,6 @@ namespace NEO_Block_API.lib
 
         public JArray GetNep5TranferFromToAddress(string chainHash, string toAddress)
         {
-            JArray jArray = new JArray();
-            if (jArrays.TryGetValue("nep5transferfromtoaddress" + chainHash + toAddress, out jArray))
-            {
-                return jArray;
-            }
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 conn.Open();
@@ -1440,7 +1404,6 @@ namespace NEO_Block_API.lib
 
                     bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata } });
                 }
-                jArrays.AddOrUpdate("nep5transferfromtoaddress" + chainHash + toAddress, bk, (s, a) => { return a; });
                 return res.result;
             }
         }
@@ -1454,8 +1417,6 @@ namespace NEO_Block_API.lib
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
-
-
                 JsonPRCresponse res = new JsonPRCresponse();
 
                 MySqlDataReader rdr = cmd.ExecuteReader();
@@ -1465,14 +1426,15 @@ namespace NEO_Block_API.lib
                     var calltype = (rdr["calltype"]).ToString();
                     var method = (rdr["method"]).ToString();
                     var contract = (rdr["contract"]).ToString();
+                    var name = getName(chainhash, contract);
 
-                    bk.Add(new JObject { { "calltype", calltype }, { "method", method }, { "contract", contract } });
+                    bk.Add(new JObject { { "calltype", calltype }, { "method", method }, { "contract", contract }, { "name", name} });
                 }
 
                 return res.result = bk;
 
             }
-        }
+        }       
 
         public JArray GetNep5Transfer(JsonRPCrequest req)
 		{
@@ -2973,6 +2935,55 @@ namespace NEO_Block_API.lib
                 }
                 return res.result = bk;
             }
+        }
+
+        public JArray GetContractState(string chainHash, string contract) {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                JsonPRCresponse res = new JsonPRCresponse();
+                conn.Open();
+
+                string select = "select name, author, email, description from contract_state_" + chainHash + " where hash='" + contract + "'";
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+                while (rdr.Read())
+                {
+                    var name = (rdr["name"]).ToString();
+                    var author = (rdr["author"]).ToString();
+                    var email = (rdr["email"]).ToString();
+                    var description = (rdr["description"]).ToString();
+
+                    bk.Add(new JObject { { "author", author }, { "name", name }, { "email", email }, { "description", description }, { "contract", contract } });
+                }
+                return res.result = bk;
+            }
+        }
+
+        private string getName(string chainHash, string contract)
+        {
+            string name = "";
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                JsonPRCresponse res = new JsonPRCresponse();
+                conn.Open();
+
+                string select = "select name from contract_state_" + chainHash + " where hash='" + contract + "'";
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+                while (rdr.Read())
+                {
+                    name = (rdr["name"]).ToString();                    
+                }
+            }
+            return name;
         }
     }
 
