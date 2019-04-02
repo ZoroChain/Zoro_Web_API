@@ -2944,6 +2944,11 @@ namespace NEO_Block_API.lib
                 JsonPRCresponse res = new JsonPRCresponse();
                 conn.Open();
 
+                if (!contract.StartsWith("0x"))
+                {
+                    contract = "0x" + contract;
+                }
+
                 string select = "select name, author, email, description from contract_state_" + chainHash + " where hash='" + contract + "'";
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
@@ -2971,6 +2976,11 @@ namespace NEO_Block_API.lib
             {
                 JsonPRCresponse res = new JsonPRCresponse();
                 conn.Open();
+
+                if (!contract.StartsWith("0x"))
+                {
+                    contract = "0x" + contract;
+                }
 
                 string select = "select name from contract_state_" + chainHash + " where hash='" + contract + "'";
 
