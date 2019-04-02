@@ -1408,7 +1408,7 @@ namespace NEO_Block_API.lib
             }
         }
 
-        public JArray GetScriptMethod(string chainhash, string txid) {           
+        public async Task<JArray> GetScriptMethodAsync(string chainhash, string txid) {           
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
 
@@ -1426,7 +1426,8 @@ namespace NEO_Block_API.lib
                     var calltype = (rdr["calltype"]).ToString();
                     var method = (rdr["method"]).ToString();
                     var contract = (rdr["contract"]).ToString();
-                    var name = getName(chainhash, contract);
+
+                    var name = await getName(chainhash, contract);                   
 
                     bk.Add(new JObject { { "calltype", calltype }, { "method", method }, { "contract", contract }, { "name", name} });
                 }
@@ -2963,7 +2964,7 @@ namespace NEO_Block_API.lib
             }
         }
 
-        private string getName(string chainHash, string contract)
+        private async Task<string> getName(string chainHash, string contract)
         {
             string name = "";
             using (MySqlConnection conn = new MySqlConnection(conf))

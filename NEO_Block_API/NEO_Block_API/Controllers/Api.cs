@@ -441,11 +441,11 @@ namespace NEO_Block_API.Controllers
                             else {
                                 chainhash = req.@params[0].ToString();
                             }
-                            result = msq.GetScriptMethod(chainhash, req.@params[1].ToString());
+                            result = await msq.GetScriptMethodAsync(chainhash, req.@params[1].ToString());
                         }
                         else
                         {
-                            result = msq.GetScriptMethod("0000000000000000000000000000000000000000", req.@params[0].ToString());
+                            result = await msq.GetScriptMethodAsync("0000000000000000000000000000000000000000", req.@params[0].ToString());
                         }
                         break;
                     case "sendrawtransaction":
