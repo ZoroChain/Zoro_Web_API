@@ -324,6 +324,9 @@ namespace NEO_Block_API.Controllers
                         result = msq.GetAppChainNep5Transfer(req);
                         break;
                     #endregion
+                    case "getpagemessage":
+                        result = msq.getPageMessage(req.@params[0].ToString(), req.@params[1].ToString());
+                        break;
                     case "getnep5count":
                         result = msq.GetNep5Count(req);
                         break;

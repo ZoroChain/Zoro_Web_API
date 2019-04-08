@@ -2972,9 +2972,9 @@ namespace NEO_Block_API.lib
         private async Task<string> getName(string chainHash, string contract)
         {
             string name = "";
+            JsonPRCresponse res = new JsonPRCresponse();
             using (MySqlConnection conn = new MySqlConnection(conf))
-            {
-                JsonPRCresponse res = new JsonPRCresponse();
+            {             
                 conn.Open();
 
                 if (!contract.StartsWith("0x"))
@@ -2995,6 +2995,75 @@ namespace NEO_Block_API.lib
                 }
             }
             return name;
+        }
+
+        public JArray getPageMessage(string chainhash, string id) {
+            JsonPRCresponse res = new JsonPRCresponse();
+            JArray bk = new JArray();
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {               
+                conn.Open();
+
+                if (!id.StartsWith("0x"))
+                {
+                    id = "0x" + id;
+                }
+
+                string select = "select * from nep5asset_" + chainhash + " where assetid='" + id + "'";
+
+                using (MySqlCommand cmd = new MySqlCommand(select, conn)) {
+                    using (MySqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        if (rdr.HasRows)
+                        {
+                            bk.Add(new JObject() { { "page", "nep5asset" } });                           
+                        }
+                    }
+                }
+                if (bk.Count > 0)
+                return res.result = bk;
+
+                if (!id.StartsWith("0x"))
+                {
+                    id = "0x" + id;
+                }
+
+                select = "select * from contract_state_" + chainhash + " where hash='" + id + "'";
+
+                using (MySqlCommand cmd = new MySqlCommand(select, conn))
+                {
+                    using (MySqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        if (rdr.HasRows)
+                        {
+                            bk.Add(new JObject() { { "page", "contract" } });
+                        }
+                    }
+                }
+                if (bk.Count > 0)
+                    return res.result = bk;
+
+                if (!id.StartsWith("0x"))
+                {
+                    id = "0x" + id;
+                }
+
+                select = "select * from appchainstate where hash='" + id + "'";
+
+                using (MySqlCommand cmd = new MySqlCommand(select, conn))
+                {
+                    using (MySqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        if (rdr.HasRows)
+                        {
+                            bk.Add(new JObject() { { "page", "appchainstate" } });
+                        }
+                    }
+                }
+                if (bk.Count > 0)
+                    return res.result = bk;
+            }
+            return res.result = bk;
         }
     }
 
