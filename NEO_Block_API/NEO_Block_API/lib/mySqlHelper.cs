@@ -1559,7 +1559,6 @@ namespace NEO_Block_API.lib
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
 
-
                 JsonPRCresponse res = new JsonPRCresponse();
 
                 MySqlDataReader rdr = cmd.ExecuteReader();
@@ -1577,6 +1576,7 @@ namespace NEO_Block_API.lib
                     var blockindex = (rdr["blockindex"]).ToString();
                     vdata = num.ToString();
 
+                    if (int.Parse(blockindex) < height)
                     bk.Add(new JObject { { "blockindex", blockindex }, { "txid", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata }, { "symbol", symbol } });
                 }
 
