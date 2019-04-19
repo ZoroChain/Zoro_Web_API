@@ -2944,7 +2944,7 @@ namespace NEO_Block_API.lib
                 JsonPRCresponse res = new JsonPRCresponse();
                 conn.Open();
 
-                string select = "select addr, nfttoken, contract from nft_address_" + chainHash + " where addr='" + address + "'";
+                string select = "select addr, nfttoken, contract, properties from nft_address_" + chainHash + " where addr='" + address + "'";
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -2957,13 +2957,14 @@ namespace NEO_Block_API.lib
                     var addr = (rdr["addr"]).ToString();
                     var nfttoken = (rdr["nfttoken"]).ToString();
                     var contract = (rdr["contract"]).ToString();
+                    var properties = (rdr["properties"]).ToString();
 
                     if (bk.Count == 0) {
                         bk.Add(new JObject { { "addr", addr } });
                     }                    
                     else if (bk[0][contract] != null)
                     {
-                        (bk[0][contract] as JArray).Add(nfttoken);
+                        (bk[0][contract] as JArray).Add(new JObject { { nfttoken, properties } });
                     }
                     else {
                         JArray jContract = new JArray();
@@ -2982,7 +2983,7 @@ namespace NEO_Block_API.lib
                 JsonPRCresponse res = new JsonPRCresponse();
                 conn.Open();
 
-                string select = "select nfttoken from nft_address_" + chainHash + " where addr='" + address + "' and contract='" + contract + "'";
+                string select = "select nfttoken,properties from nft_address_" + chainHash + " where addr='" + address + "' and contract='" + contract + "'";
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -2993,10 +2994,12 @@ namespace NEO_Block_API.lib
                 while (rdr.Read())
                 {
                     var nfttoken = (rdr["nfttoken"]).ToString();
+                    var properties = (rdr["properties"]).ToString();
+
                     if (bk.Count == 0)
                     {
                         JArray jArray = new JArray();
-                        jArray.Add(nfttoken);
+                        jArray.Add(new JObject { { nfttoken, properties } });
                         bk.Add(new JObject { { "nfttoken", jArray } });
                     }
                     else {
