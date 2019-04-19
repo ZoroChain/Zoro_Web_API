@@ -2938,6 +2938,75 @@ namespace NEO_Block_API.lib
             }
         }
 
+        public JArray GetNFTFromAddr(string chainHash, string address) {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                JsonPRCresponse res = new JsonPRCresponse();
+                conn.Open();
+
+                string select = "select addr, nfttoken, contract from nft_address_" + chainHash + " where addr='" + address + "'";
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+                long startTime = -1;
+                while (rdr.Read())
+                {
+                    var addr = (rdr["addr"]).ToString();
+                    var nfttoken = (rdr["nfttoken"]).ToString();
+                    var contract = (rdr["contract"]).ToString();
+
+                    if (bk.Count == 0) {
+                        bk.Add(new JObject { { "addr", addr } });
+                    }                    
+                    else if (bk[0][contract] != null)
+                    {
+                        (bk[0][contract] as JArray).Add(nfttoken);
+                    }
+                    else {
+                        JArray jContract = new JArray();
+                        jContract.Add(nfttoken);
+                        (bk[0] as JObject).Add(contract, jContract);
+                    }                   
+                }
+                return res.result = bk;
+            }
+        }
+
+        public JArray GetNFTFromAddr(string chainHash, string address, string contract)
+        {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                JsonPRCresponse res = new JsonPRCresponse();
+                conn.Open();
+
+                string select = "select nfttoken from nft_address_" + chainHash + " where addr='" + address + "' and contract='" + contract + "'";
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+                long startTime = -1;
+                while (rdr.Read())
+                {
+                    var nfttoken = (rdr["nfttoken"]).ToString();
+                    if (bk.Count == 0)
+                    {
+                        JArray jArray = new JArray();
+                        jArray.Add(nfttoken);
+                        bk.Add(new JObject { { "nfttoken", jArray } });
+                    }
+                    else {
+                        (bk[0]["nfttoken"] as JArray).Add(nfttoken);
+                    }                   
+                }
+                return res.result = bk;
+            }
+        }
+
         public JArray GetContractState(string chainHash, string contract) {
             using (MySqlConnection conn = new MySqlConnection(conf))
             {

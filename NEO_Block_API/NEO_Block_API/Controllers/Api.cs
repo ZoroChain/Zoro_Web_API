@@ -362,6 +362,53 @@ namespace NEO_Block_API.Controllers
                             result = msq.GetContractMessage("0000000000000000000000000000000000000000", contract);
                         }
                         break;
+                    case "getnftfromaddr":
+                        string nftChainHash = "";
+                        string nftaddr = "";
+                        if (req.@params.Length > 1)
+                        {
+                            if (req.@params[0].ToString() == "")
+                            {
+                                nftChainHash = "0000000000000000000000000000000000000000";
+                            }
+                            else
+                            {
+                                nftChainHash = req.@params[0].ToString();
+                            }
+                            nftaddr = req.@params[1].ToString();
+                            result = msq.GetNFTFromAddr(nftChainHash, nftaddr);
+                        }
+                        else
+                        {
+                            nftaddr = req.@params[0].ToString();
+                            result = msq.GetNFTFromAddr("0000000000000000000000000000000000000000", nftaddr);
+                        }
+                        break;
+                    case "getnftfromaddrandhash":
+                        string tokenChainHash = "";
+                        string tokenaddr = "";
+                        string hash = "";
+                        if (req.@params.Length > 2)
+                        {
+                            if (req.@params[0].ToString() == "")
+                            {
+                                tokenChainHash = "0000000000000000000000000000000000000000";
+                            }
+                            else
+                            {
+                                tokenChainHash = req.@params[0].ToString();
+                            }
+                            tokenaddr = req.@params[1].ToString();
+                            hash = req.@params[2].ToString();
+                            result = msq.GetNFTFromAddr(tokenChainHash, tokenaddr, hash);
+                        }
+                        else
+                        {
+                            tokenaddr = req.@params[0].ToString();
+                            hash = req.@params[1].ToString();
+                            result = msq.GetNFTFromAddr("0000000000000000000000000000000000000000", tokenaddr, hash);
+                        }
+                        break;
                     case "getcontractstatemessage":
                         string stateChainHash = "";
                         string state = "";
