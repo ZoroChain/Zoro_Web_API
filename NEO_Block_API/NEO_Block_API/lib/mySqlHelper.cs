@@ -2976,15 +2976,32 @@ namespace NEO_Block_API.lib
             }
         }
 
-        public JArray GetNFTFromAddr(string chainHash, string address, string contract)
+        public JArray GetNFTFromAddr(JsonRPCrequest req)
         {
+            string chainHash = req.@params[0].ToString() == "" ? "0000000000000000000000000000000000000000" : req.@params[0].ToString();
+            string contract = req.@params[1].ToString();
+            string address = req.@params[2].ToString();
+            string page = req.@params[3].ToString();
+            string pageLength = req.@params[4].ToString();
+            string isDesc = "0";
+            if (req.@params.Length > 5) {
+                isDesc = req.@params[5].ToString() == "0" ? "0" : "1";
+            }
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 JsonPRCresponse res = new JsonPRCresponse();
                 conn.Open();
 
-                string select = "select nfttoken,properties from nft_address_" + chainHash + " where addr='" + address + "' and contract='" + contract + "'";
-
+                string select = "select nfttoken,properties from nft_address_" + chainHash + " where addr='" + address + "' and contract='" + contract + "' order by id ";
+                if (isDesc == "0")
+                {
+                    select += "asc ";
+                }
+                else
+                {
+                    select += "desc ";
+                }
+                select += "limit " + ((int.Parse(page) - 1) * int.Parse(pageLength)) + ", " + pageLength;
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
                 MySqlDataReader rdr = cmd.ExecuteReader();
@@ -2994,17 +3011,43 @@ namespace NEO_Block_API.lib
                 while (rdr.Read())
                 {
                     var nfttoken = (rdr["nfttoken"]).ToString();
-                    var properties = (rdr["properties"]).ToString();
+                    var properties = Encoding.Default.GetString(rdr["properties"].ToString().HexString2Bytes());
 
                     if (bk.Count == 0)
                     {
-                        JArray jArray = new JArray();
-                        jArray.Add(new JObject { { nfttoken, properties } });
-                        bk.Add(new JObject { { "nfttoken", jArray } });
+                        bk.Add(new JObject { { nfttoken, new JObject { { "properties", properties } } } });
                     }
-                    else {
-                        (bk[0]["nfttoken"] as JArray).Add(nfttoken);
-                    }                   
+                    else
+                    {
+                        (bk[0] as JObject).Add(nfttoken, new JObject { { "properties", properties } });
+                    }              
+                }
+                return res.result = bk;
+            }
+        }
+
+        public JArray getProperties(JsonRPCrequest req) {
+            string chainHash = req.@params[0].ToString() == ""? "0000000000000000000000000000000000000000": req.@params[0].ToString();
+            string contract = req.@params[1].ToString();
+            string nfttoken = req.@params[2].ToString();
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                JsonPRCresponse res = new JsonPRCresponse();
+                conn.Open();
+
+                string select = "select properties from nft_address_" + chainHash + " where nfttoken='" + nfttoken + "' and contract='" + contract + "'";
+
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+                long startTime = -1;
+                while (rdr.Read())
+                {
+                    var properties = Encoding.Default.GetString(rdr["properties"].ToString().HexString2Bytes());
+
+                    bk.Add(new JObject { { "properties", properties } });
                 }
                 return res.result = bk;
             }
