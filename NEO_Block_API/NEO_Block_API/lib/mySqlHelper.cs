@@ -2976,7 +2976,7 @@ namespace NEO_Block_API.lib
             }
         }
 
-        public JArray GetNFTFromAddr(JsonRPCrequest req)
+        public JArray GetNFTFromAddrAndHash(JsonRPCrequest req)
         {
             string chainHash = req.@params[0].ToString() == "" ? "0000000000000000000000000000000000000000" : req.@params[0].ToString();
             string contract = req.@params[1].ToString();
@@ -3021,6 +3021,41 @@ namespace NEO_Block_API.lib
                     {
                         (bk[0] as JObject).Add(nfttoken, new JObject { { "properties", properties } });
                     }              
+                }
+                return res.result = bk;
+            }
+        }
+
+        public JArray GetNFTHashFromAddr(JsonRPCrequest req)
+        {
+            string chainHash = req.@params[0].ToString() == "" ? "0000000000000000000000000000000000000000" : req.@params[0].ToString();
+            string address = req.@params[1].ToString();
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                JsonPRCresponse res = new JsonPRCresponse();
+                conn.Open();
+
+                string select = "select distinct contract from nft_address_" + chainHash + " where addr='" + address + "'";
+                                
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                JArray bk = new JArray();
+             
+                while (rdr.Read())
+                {
+                    var nfthash = (rdr["contract"]).ToString();
+
+                    if (bk.Count == 0)
+                    {
+                        bk.Add(new JObject { { "nfthash", new JArray { nfthash } } });
+                    }
+                    else
+                    {
+                        (bk[0]["nfthash"] as JArray).Add(nfthash);
+                    }
+                    
                 }
                 return res.result = bk;
             }

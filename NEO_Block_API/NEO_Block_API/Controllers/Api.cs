@@ -362,34 +362,44 @@ namespace NEO_Block_API.Controllers
                             result = msq.GetContractMessage("0000000000000000000000000000000000000000", contract);
                         }
                         break;
-                    case "getnftfromaddr":
-                        string nftChainHash = "";
-                        string nftaddr = "";
-                        if (req.@params.Length > 1)
-                        {
-                            if (req.@params[0].ToString() == "")
-                            {
-                                nftChainHash = "0000000000000000000000000000000000000000";
-                            }
-                            else
-                            {
-                                nftChainHash = req.@params[0].ToString();
-                            }
-                            nftaddr = req.@params[1].ToString();
-                            result = msq.GetNFTFromAddr(nftChainHash, nftaddr);
-                        }
-                        else
-                        {
-                            nftaddr = req.@params[0].ToString();
-                            result = msq.GetNFTFromAddr("0000000000000000000000000000000000000000", nftaddr);
-                        }
-                        break;
+
+                    #region 获取一个地址下的所有 nft token
+                    //case "getnftfromaddr":
+                    //    string nftChainHash = "";
+                    //    string nftaddr = "";
+                    //    if (req.@params.Length > 1)
+                    //    {
+                    //        if (req.@params[0].ToString() == "")
+                    //        {
+                    //            nftChainHash = "0000000000000000000000000000000000000000";
+                    //        }
+                    //        else
+                    //        {
+                    //            nftChainHash = req.@params[0].ToString();
+                    //        }
+                    //        nftaddr = req.@params[1].ToString();
+                    //        result = msq.GetNFTFromAddr(nftChainHash, nftaddr);
+                    //    }
+                    //    else
+                    //    {
+                    //        nftaddr = req.@params[0].ToString();
+                    //        result = msq.GetNFTFromAddr("0000000000000000000000000000000000000000", nftaddr);
+                    //    }
+                    //    break;
+                    #endregion
+
+                    #region 获取 nft 相关信息
                     case "getnftfromaddrandhash":
-                        result = msq.GetNFTFromAddr(req);
+                        result = msq.GetNFTFromAddrAndHash(req);
+                        break;
+                    case "getnfthashfromaddr":
+                        result = msq.GetNFTHashFromAddr(req);
                         break;
                     case "gettokenproperties":
                         result = msq.getProperties(req);
                         break;
+                    #endregion
+
                     case "getcontractstatemessage":
                         string stateChainHash = "";
                         string state = "";
