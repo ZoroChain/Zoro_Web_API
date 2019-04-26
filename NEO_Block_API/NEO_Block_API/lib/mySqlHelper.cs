@@ -1665,7 +1665,7 @@ namespace NEO_Block_API.lib
 
                 if (bk.Count < 1) {
                     int blockindex = GetNotify(txid, "0000000000000000000000000000000000000000");
-                    if (blockindex > -1)
+                    if (blockindex > -1 && blockindex < height)
                     {
                         bk.Add(new JObject { { "blockindex", blockindex }, { "txid", txid }, { "asset", "" }, { "from", "" }, { "to", "" }, { "value", "" }, { "symbol", "" } });
                     }
@@ -1718,7 +1718,7 @@ namespace NEO_Block_API.lib
                 if (bk.Count < 1)
                 {
                     int blockindex = GetNotify(txid, req.@params[0].ToString());
-                    if (blockindex > -1)
+                    if (blockindex > -1 && blockindex < height)
                     {
                         bk.Add(new JObject { { "blockindex", blockindex }, { "txid", txid }, { "asset", "" }, { "from", "" }, { "to", "" }, { "value", "" }, { "symbol", "" } });
                     }
