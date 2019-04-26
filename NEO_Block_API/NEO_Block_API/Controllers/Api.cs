@@ -49,28 +49,6 @@ namespace NEO_Block_API.Controllers
             }
         }
 
-        private JArray getJAbyKV(string key, object value)
-        {
-            return  new JArray
-                        {
-                            new JObject
-                            {
-                                {
-                                    key,
-                                    value.ToString()
-                                }
-                            }
-                        };
-        }
-
-        private JArray getJAbyJ(JObject J)
-        {
-            return new JArray
-                        {
-                            J
-                        };
-        }
-
         public async Task<object> getResAsync(JsonRPCrequest req,string reqAddr)
         {
             JArray result = new JArray();
@@ -135,7 +113,7 @@ namespace NEO_Block_API.Controllers
                     #endregion
                     #region 获取爬虫爬到的blockcount
                     case "getdatablockheight":
-                        result = msq.GetBlockCount(req);
+                        result = msq.GetDataBlockHeight(req);
                         break;
                     case "getappchaindatablockheight":
                         result = msq.GetAppchainBlockCount(req);

@@ -110,8 +110,6 @@ namespace NEO_Block_API.lib
 			{
 				conn.Open();
 
-
-
 				string select = "select addr, firstuse, lastuse, txcount from address_0000000000000000000000000000000000000000 limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0]; // string select = "select a.addr, a.firstuse,a.lastuse, a.txcount, b.blockindex ,b.blocktime ,b.txid from address_0000000000000000000000000000000000000000 as a limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
 
 				JsonPRCresponse res = new JsonPRCresponse();
@@ -143,8 +141,6 @@ namespace NEO_Block_API.lib
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 conn.Open();
-
-
 
                 string select = "select addr, firstuse, lastuse, txcount from address_" + req.@params[0]+ " limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + req.@params[1]; // string select = "select a.addr, a.firstuse,a.lastuse, a.txcount, b.blockindex ,b.blocktime ,b.txid from address_0000000000000000000000000000000000000000 as a limit " + (int.Parse(req.@params[0].ToString()) * int.Parse(req.@params[1].ToString())) + ", " + req.@params[0];
 
@@ -2678,42 +2674,25 @@ namespace NEO_Block_API.lib
         }
 
 
-        public JArray GetBlockCount(JsonRPCrequest req)   // gets the last 1 in desc
+        public JArray GetDataBlockHeight(JsonRPCrequest req)   // gets the last 1 in desc
 		{
-			using (MySqlConnection conn = new MySqlConnection(conf))
-			{
-				conn.Open();
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();
 
-		
-				string select = "SELECT indexx FROM block_0000000000000000000000000000000000000000 ORDER BY id DESC LIMIT 1"; //;
+                string sql = "SELECT chainheight FROM `chainlistheight` where chainhash='0x0000000000000000000000000000000000000000'"; //;
 
+                MySqlCommand cmd = new MySqlCommand(sql, conn);
 
-				MySqlCommand cmd = new MySqlCommand(select, conn);
-		
+                JsonPRCresponse res = new JsonPRCresponse();
 
-				JsonPRCresponse res = new JsonPRCresponse();
-
-				MySqlDataReader rdr = cmd.ExecuteReader();
-				while (rdr.Read())
-				{
-					
-						var adata = (rdr["indexx"]).ToString();
-
-						JArray bk = new JArray {
-					 new JObject    {
-										{"blockDataHeight",adata}, { "txDataHeight", adata}, { "utxoDataHeight", adata}, { "notifyDataHeight", adata}, { "fulllogDataHeight", adata}
-                                   }
-
-							   }; 
-
-						res.result = bk;
-					}
-				
-
-				return res.result;
-			}
-
-
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                while (rdr.Read())
+                {
+                    res.result = new JArray { new JObject { { "blockDataHeight", rdr["chainheight"].ToString() } } };
+                }
+                return res.result;
+            }
 		}
 
 
@@ -2992,22 +2971,34 @@ namespace NEO_Block_API.lib
                 JsonPRCresponse res = new JsonPRCresponse();
                 conn.Open();
 
-                string select = "select nfttoken,properties from nft_address_" + chainHash + " where addr='" + address + "' and contract='" + contract + "' order by id ";
+                string sql = "select nfttoken,properties from nft_address_" + chainHash + " where addr='" + address + "' and contract='" + contract + "' order by id ";
                 if (isDesc == "0")
                 {
-                    select += "asc ";
+                    sql += "asc ";
                 }
                 else
                 {
-                    select += "desc ";
+                    sql += "desc ";
                 }
-                select += "limit " + ((int.Parse(page) - 1) * int.Parse(pageLength)) + ", " + pageLength;
-                MySqlCommand cmd = new MySqlCommand(select, conn);
+                sql += "limit " + ((int.Parse(page) - 1) * int.Parse(pageLength)) + ", " + pageLength;
 
-                MySqlDataReader rdr = cmd.ExecuteReader();
+                var sql1 = "SELECT chainheight FROM `chainlistheight` where chainhash='0x" + chainHash + "'";
+
+                MySqlCommand cmd1 = new MySqlCommand(sql1, conn);
+                MySqlDataReader rdr1 = cmd1.ExecuteReader();
 
                 JArray bk = new JArray();
-                long startTime = -1;
+
+                while (rdr1.Read())
+                {
+                    var height = rdr1["chainheight"].ToString();
+                    bk.Add(new JObject{ { "datablockheight", height } });
+                }
+                rdr1.Close();
+
+                MySqlCommand cmd = new MySqlCommand(sql, conn);
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                
                 while (rdr.Read())
                 {
                     var nfttoken = (rdr["nfttoken"]).ToString();
@@ -3022,6 +3013,8 @@ namespace NEO_Block_API.lib
                         (bk[0] as JObject).Add(nfttoken, new JObject { { "properties", properties } });
                     }              
                 }
+                rdr.Close();
+
                 return res.result = bk;
             }
         }
