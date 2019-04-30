@@ -1,8 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace NEO_Block_API
 {
@@ -11,9 +8,10 @@ namespace NEO_Block_API
         public string MysqlConfig { get; }
         public string Url { get; }
         public static Settings Default { get; }
+        public int ServerPort { get; }
 
         static Settings() {
-            IConfigurationSection section = new ConfigurationBuilder().AddJsonFile("mysqlSettings.testnet.json").Build().GetSection("ApplicationConfiguration");
+            IConfigurationSection section = new ConfigurationBuilder().AddJsonFile("mysqlSettings.json").Build().GetSection("ApplicationConfiguration");
             Default = new Settings(section);
         }
 
@@ -26,6 +24,7 @@ namespace NEO_Block_API
                 MysqlConfig += ";";
             }
             Url = section.GetSection("UrL").Value;
+            ServerPort = int.Parse(section.GetSection("ServerPort").Value);
         }
     }
 }

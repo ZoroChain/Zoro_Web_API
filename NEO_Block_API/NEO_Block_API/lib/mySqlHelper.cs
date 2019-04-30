@@ -1,19 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using MySql.Data.MySqlClient;
-using System.Data;
 using System.Text;
 using NEO_Block_API.RPC;
 using Newtonsoft.Json.Linq;
-using System.Data.SqlClient;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using System.Timers;
 
 namespace NEO_Block_API.lib
 {
-	public class mySqlHelper
+    public class mySqlHelper
 	{
         public static string conf = "";
         private int height = 0;
@@ -1519,7 +1516,8 @@ namespace NEO_Block_API.lib
             }
         }
 
-        private int GetNotify(string txid, string chainhash) {
+        private int GetNotify(string txid, string chainhash)
+        {
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 conn.Open();
@@ -1639,9 +1637,7 @@ namespace NEO_Block_API.lib
 
                 string select = "select a.blockindex as blockindex, a.txid as txid, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals, b.symbol as symbol from nep5transfer_0000000000000000000000000000000000000000 as a, nep5asset_0000000000000000000000000000000000000000 as b where a.txid = '" + txid + "' and a.asset=b.assetid";
 
-				MySqlCommand cmd = new MySqlCommand(select, conn); 
-			
-
+				MySqlCommand cmd = new MySqlCommand(select, conn);
 
 				JsonPRCresponse res = new JsonPRCresponse();
 
@@ -1663,7 +1659,8 @@ namespace NEO_Block_API.lib
 					bk.Add(new JObject { { "blockindex", blockindex }, { "txid", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata } , { "value", vdata }, { "symbol", symbol} });
 				}
 
-                if (bk.Count < 1) {
+                if (bk.Count < 1)
+                {
                     int blockindex = GetNotify(txid, "0000000000000000000000000000000000000000");
                     if (blockindex > -1 && blockindex < height)
                     {
@@ -2689,7 +2686,7 @@ namespace NEO_Block_API.lib
                 MySqlDataReader rdr = cmd.ExecuteReader();
                 while (rdr.Read())
                 {
-                    res.result = new JArray { new JObject { { "blockDataHeight", rdr["chainheight"].ToString() } } };
+                    res.result = new JArray { new JObject { { "datablockheight", rdr["chainheight"].ToString() } } };
                 }
                 return res.result;
             }
@@ -2981,21 +2978,9 @@ namespace NEO_Block_API.lib
                     sql += "desc ";
                 }
                 sql += "limit " + ((int.Parse(page) - 1) * int.Parse(pageLength)) + ", " + pageLength;
-
-                var sql1 = "SELECT chainheight FROM `chainlistheight` where chainhash='0x" + chainHash + "'";
-
-                MySqlCommand cmd1 = new MySqlCommand(sql1, conn);
-                MySqlDataReader rdr1 = cmd1.ExecuteReader();
-
+               
                 JArray bk = new JArray();
-
-                while (rdr1.Read())
-                {
-                    var height = rdr1["chainheight"].ToString();
-                    bk.Add(new JObject{ { "datablockheight", height } });
-                }
-                rdr1.Close();
-
+                
                 MySqlCommand cmd = new MySqlCommand(sql, conn);
                 MySqlDataReader rdr = cmd.ExecuteReader();
                 

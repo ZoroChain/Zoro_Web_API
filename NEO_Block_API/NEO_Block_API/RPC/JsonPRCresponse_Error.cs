@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace NEO_Block_API.RPC
+﻿namespace NEO_Block_API.RPC
 {
     public class JsonPRCresponse_Error
     {

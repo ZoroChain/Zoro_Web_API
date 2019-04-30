@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-
-namespace NEO_Block_API.RPC
+﻿namespace NEO_Block_API.RPC
 {
     public class JsonRPCrequest
     {

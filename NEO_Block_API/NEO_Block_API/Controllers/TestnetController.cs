@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NEO_Block_API.RPC;
 using NEO_Block_API.lib;
-using System.IO;
 using log4net;
 
 namespace NEO_Block_API.Controllers
