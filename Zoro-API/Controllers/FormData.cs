@@ -53,7 +53,6 @@ namespace LitServer
         public static async Task<FormData> FromRequest(Microsoft.AspNetCore.Http.HttpRequest request)
         {
             try
-
             {
                 FormData data = new FormData();
                 foreach (var kv in request.Query)

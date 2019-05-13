@@ -982,7 +982,7 @@ namespace Zoro_Web_API.lib
                     var tdata = (rdr["time"]).ToString();
                     var txcount = (rdr["txcount"]).ToString();
 
-                    bk.Add(new JObject { { "size", sdata }, { "hash", hash }, { "index", ind }, { "time", tdata }, { "txcount", txcount }, { "nowtime", (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds } });
+                    bk.Add(new JObject { { "size", sdata }, { "hash", hash }, { "index", ind }, { "time", tdata }, { "txcount", txcount }, { "nowtime", (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds } });
                 }
                 jArrays.AddOrUpdate("blocksdesc", bk, (s, a) => { return a; });
                 return res.result = bk;
@@ -1245,7 +1245,7 @@ namespace Zoro_Web_API.lib
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 conn.Open();
-                string select = "select calltype, method, contract from tx_script_method_" + chainhash + " where txid='" + txid + "'";
+                string select = "select tx.calltype, tx.method, tx.contract,cs.supportstandard supportstandard from tx_script_method_" + chainhash + " tx left join contract_state_" + chainhash + " cs on tx.contract = cs.hash where txid = '" + txid + "'";
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1258,10 +1258,11 @@ namespace Zoro_Web_API.lib
                     var calltype = (rdr["calltype"]).ToString();
                     var method = (rdr["method"]).ToString();
                     var contract = (rdr["contract"]).ToString();
+                    var supportstandard = (rdr["supportstandard"].ToString());
 
                     var name = getName(chainhash, contract);
 
-                    bk.Add(new JObject { { "calltype", calltype }, { "method", method }, { "contract", contract }, { "name", name } });
+                    bk.Add(new JObject { { "calltype", calltype }, { "method", method }, { "contract", contract }, { "name", name }, { "supportstandard", supportstandard } });
                 }
 
                 return res.result = bk;
@@ -2770,6 +2771,57 @@ namespace Zoro_Web_API.lib
                     else
                     {
                         (bk[0] as JObject).Add(nfttoken, new JObject { { "properties", properties } });
+                    }
+                }
+                rdr.Close();
+
+                return res.result = bk;
+            }
+        }
+
+        public JArray GetNFTFromHash(JsonRPCrequest req)
+        {
+            string chainHash = req.@params[0].ToString() == "" ? rootChain : req.@params[0].ToString();
+            string contract = req.@params[1].ToString();           
+            string page = req.@params[2].ToString();
+            string pageLength = req.@params[3].ToString();
+            string isDesc = "0";
+            if (req.@params.Length > 4)
+            {
+                isDesc = req.@params[4].ToString() == "0" ? "0" : "1";
+            }
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                JsonPRCresponse res = new JsonPRCresponse();
+                conn.Open();
+
+                string sql = "select nfttoken from nft_address_" + chainHash + " where contract='" + contract + "' order by id ";
+                if (isDesc == "0")
+                {
+                    sql += "asc ";
+                }
+                else
+                {
+                    sql += "desc ";
+                }
+                sql += "limit " + ((int.Parse(page) - 1) * int.Parse(pageLength)) + ", " + pageLength;
+
+                JArray bk = new JArray();
+
+                MySqlCommand cmd = new MySqlCommand(sql, conn);
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                while (rdr.Read())
+                {
+                    var nfttoken = (rdr["nfttoken"]).ToString();                    
+
+                    if (bk.Count == 0)
+                    {
+                        bk.Add(new JObject { { "nfttoken", new JArray { nfttoken } } });
+                    }
+                    else
+                    {
+                        (bk[0]["nfttoken"] as JArray).Add(nfttoken);
                     }
                 }
                 rdr.Close();

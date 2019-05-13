@@ -373,6 +373,9 @@ namespace Zoro_Web_API.Controllers
                     case "getnfthashfromaddr":
                         result = msq.GetNFTHashFromAddr(req);
                         break;
+                    case "getnftfromhash":
+                        result = msq.GetNFTFromHash(req);
+                        break;
                     case "gettokenproperties":
                         result = msq.getProperties(req);
                         break;
