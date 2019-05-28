@@ -2903,9 +2903,9 @@ namespace Zoro_Web_API.lib
                 if (!contract.StartsWith("0x"))
                 {
                     contract = "0x" + contract;
-                }
+                }              
 
-                string select = "select name, author, email, description from contract_state_" + chainHash + " where hash='" + contract + "'";
+                string select = "select name, author, email, description, supportstandard from contract_state_" + chainHash + " where hash='" + contract + "'";
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -2918,8 +2918,9 @@ namespace Zoro_Web_API.lib
                     var author = (rdr["author"]).ToString();
                     var email = (rdr["email"]).ToString();
                     var description = (rdr["description"]).ToString();
+                    var supportstandard = rdr["supportstandard"].ToString();
 
-                    bk.Add(new JObject { { "author", author }, { "name", name }, { "email", email }, { "description", description }, { "contract", contract } });
+                    bk.Add(new JObject { { "author", author }, { "name", name }, { "email", email }, { "description", description }, { "supportstandard", supportstandard }, { "contract", contract } });
                 }
                 return res.result = bk;
             }
