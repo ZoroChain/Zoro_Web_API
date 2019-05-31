@@ -1634,16 +1634,16 @@ namespace Zoro_Web_API.lib
                     bk.Add(new JObject { { "blockindex", blockindex }, { "txid", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata }, { "symbol", symbol } });
                 }
 
-                JArray notify = GetNotifys(req.@params, rootChain, 0);
-                int j = 0;
-                for (int i = 0; i < notify.Count; i++)
-                {
-                    if (bk.Count == 0 || bk.Count < i - j + 1 || notify[i]["txid"].ToString() != bk[i - j]["txid"].ToString())
-                    {
-                        j++;
-                        bk.Add(new JObject { { "blockindex", notify[i]["blockindex"].ToString() }, { "txid", notify[i]["txid"].ToString() }, { "asset", "" }, { "from", "" }, { "to", "" }, { "value", "" }, { "symbol", "" } });
-                    }
-                }
+                //JArray notify = GetNotifys(req.@params, rootChain, 0);
+                //int j = 0;
+                //for (int i = 0; i < notify.Count; i++)
+                //{
+                //    if (bk.Count == 0 || bk.Count < i - j + 1 || notify[i]["txid"].ToString() != bk[i - j]["txid"].ToString())
+                //    {
+                //        j++;
+                //        bk.Add(new JObject { { "blockindex", notify[i]["blockindex"].ToString() }, { "txid", notify[i]["txid"].ToString() }, { "asset", "" }, { "from", "" }, { "to", "" }, { "value", "" }, { "symbol", "" } });
+                //    }
+                //}
 
                 return res.result = bk;
 
