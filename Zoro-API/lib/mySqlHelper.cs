@@ -1402,8 +1402,8 @@ namespace Zoro_Web_API.lib
                     var blockindex = (rdr["blockindex"]).ToString();
                     vdata = num.ToString();
 
-                    if (int.Parse(blockindex) < height)
-                        bk.Add(new JObject { { "blockindex", blockindex }, { "txid", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata }, { "symbol", symbol } });
+                    //if (int.Parse(blockindex) < height)
+                    bk.Add(new JObject { { "blockindex", blockindex }, { "txid", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata }, { "symbol", symbol } });
                 }
 
                 return res.result = bk;
