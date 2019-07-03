@@ -56,7 +56,7 @@ namespace Zoro_Web_API.lib
                         Decimal value = Decimal.Parse(balance) / new Decimal(Math.Pow(10, int.Parse(decimals)));
                         //string fmt = "{0:N" + decimals + "}";
                         //result = new JObject{ { "symbol",symbol },{ "balance", string.Format(fmt, value) } };
-                        result = new JObject { { "symbol", symbol }, { "balance", value } };
+                        result = new JObject { { "symbol", symbol },{ "decimals", decimals }, { "balance", value } };
                     }
                 }
                 else if (json.ContainsKey("error"))

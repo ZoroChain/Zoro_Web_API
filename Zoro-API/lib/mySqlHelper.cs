@@ -221,6 +221,49 @@ namespace Zoro_Web_API.lib
             }
         }
 
+        public JArray GetAddressNep5Txs(JsonRPCrequest req)
+        {
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();
+                var chainHash = req.@params[0].ToString();
+                if (string.IsNullOrEmpty(chainHash) || chainHash == " ") chainHash = rootChain;
+                var addr = req.@params[1].ToString();
+                string select = "select blockindex,txid,asset,symbol,decimals,value,fromx,tox from nep5transfer_" + chainHash + " tra left join nep5asset_" + chainHash + " nep on tra.asset = nep.assetid where fromx = @addr or tox = @addr order by blockindex desc limit " + (int.Parse(req.@params[2].ToString()) * int.Parse(req.@params[3].ToString())) + ", " + req.@params[2];
+
+                JsonPRCresponse res = new JsonPRCresponse();
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+                cmd.Parameters.AddWithValue("@addr", addr);
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                JArray bk = new JArray();
+                while (rdr.Read())
+                {
+                    var fromx = rdr["fromx"].ToString();
+                    var tox = rdr["tox"].ToString();
+                    var value = rdr["value"].ToString();
+                    var decimals = rdr["decimals"].ToString();
+
+                    Decimal amount = Decimal.Parse(value) / new Decimal(Math.Pow(10, int.Parse(decimals)));
+                    if (fromx == addr)
+                        value = "-" + amount;
+                    else if (tox == addr)
+                        value = "+" + amount;                                        
+
+                    bk.Add(new JObject
+                    {
+                        { "addr", addr },
+                        { "txid", rdr["txid"].ToString() },
+                        { "blockindex", rdr["blockindex"].ToString() },
+                        { "asset", rdr["asset"].ToString()},
+                        { "symbol", rdr["symbol"].ToString()},                       
+                        { "value", value},
+                    });
+                }
+                return res.result = bk;
+            }
+        }
+
         public JArray GetAddressTxs(JsonRPCrequest req)
         {
             using (MySqlConnection conn = new MySqlConnection(conf))
@@ -574,8 +617,11 @@ namespace Zoro_Web_API.lib
 
         public async Task<JArray> GetAppChainBalanceAsync(JsonRPCrequest req) // needs to be changed for the right balance data
         {
+            var chainHash = req.@params[0].ToString();
+            if (string.IsNullOrEmpty(chainHash) || chainHash == " ") chainHash = rootChain;
+
             JArray jArray = new JArray();
-            if (jArrays.TryGetValue("appchainbalance" + req.@params[0] + req.@params[1], out jArray))
+            if (jArrays.TryGetValue("appchainbalance" + chainHash + req.@params[1], out jArray))
             {
                 return jArray;
             }
@@ -583,7 +629,7 @@ namespace Zoro_Web_API.lib
             {
                 conn.Open();
 
-                string select = "select asset, type from address_asset_" + req.@params[0] + " where addr='" + req.@params[1] + "'";
+                string select = "select asset, type from address_asset_" + chainHash + " where addr='" + req.@params[1] + "'";
 
                 JsonPRCresponse res = new JsonPRCresponse();
                 MySqlCommand cmd = new MySqlCommand(select, conn);
@@ -597,17 +643,20 @@ namespace Zoro_Web_API.lib
                     var jObject = new JObject();
                     if (type == "NativeNep5")
                     {
-                        jObject = await InvokeHelper.getNativeBalanceOfAsync(req.@params[0].ToString(), asset, req.@params[1].ToString());
+                        jObject = await InvokeHelper.getNativeBalanceOfAsync(chainHash, asset, req.@params[1].ToString());
                     }
                     else
                     {
-                        jObject = await InvokeHelper.getBalanceOfAsync(req.@params[0].ToString(), asset, req.@params[1].ToString());
+                        jObject = await InvokeHelper.getBalanceOfAsync(chainHash, asset, req.@params[1].ToString());
                     }
+
+                    jObject.Add("asset", asset);
+
                     bk.Add(jObject);
 
                 }
 
-                jArrays.AddOrUpdate("appchainbalance" + req.@params[0] + req.@params[1], bk, (s, a) => { return a; });
+                jArrays.AddOrUpdate("appchainbalance" + chainHash + req.@params[1], bk, (s, a) => { return a; });
                 return res.result = bk;
             }
         }

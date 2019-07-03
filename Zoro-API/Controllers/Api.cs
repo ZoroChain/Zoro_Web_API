@@ -17,6 +17,7 @@ namespace Zoro_Web_API.Controllers
         private string neoCliJsonRPCUrl { get; set; }
 
         private string rootChain = "0000000000000000000000000000000000000000";
+        private string chainhash = "";
 
         httpHelper hh = new httpHelper();
         mongoHelper mh = new mongoHelper();
@@ -102,7 +103,7 @@ namespace Zoro_Web_API.Controllers
                         a.Add(new JObject { { "blockcount", JObject.Parse(s)["result"].ToString() } });
                         result = a;
                         break;
-                    case "getappchainblockcount":
+                    case "getappchainblockcount":                        
                         var appchainblockcount = Helper.MakeRpcUrl(ZoroHelper.ZoroUrl, "getblockcount", req.@params[0].ToString());
                         var apps = await Helper.HttpGet(appchainblockcount);
                         var appa = new JArray();
@@ -235,6 +236,9 @@ namespace Zoro_Web_API.Controllers
                         break;
                     case "getappchainaddresstxs":
                         result = msq.GetAppChainAddressTxs(req);
+                        break;
+                    case "getaddressnep5txs":
+                        result = msq.GetAddressNep5Txs(req);
                         break;
                     #endregion
                     #region 获取balance
@@ -452,8 +456,7 @@ namespace Zoro_Web_API.Controllers
                             result = msq.GetBlock2TimeNext(rootChain);
                         }
                         break;
-                    case "getscriptmethod":
-                        string chainhash = "";
+                    case "getscriptmethod":                        
                         if (req.@params.Length > 1)
                         {
                             if (req.@params[0].ToString() == "")
@@ -475,8 +478,16 @@ namespace Zoro_Web_API.Controllers
                         var tx = "";
                         if (req.@params.Length > 1)
                         {
-                            //byte[] postArray = APIHelper.HexString2Bytes(req.@params[1].ToString());
-                            tx = await ZoroHelper.SendRawTransaction(req.@params[1].ToString(), req.@params[0].ToString());
+                            if (req.@params[0].ToString() == "")
+                            {
+                                chainhash = rootChain;
+                            }
+                            else
+                            {
+                                chainhash = req.@params[0].ToString();
+                            }
+
+                            tx = await ZoroHelper.SendRawTransaction(req.@params[1].ToString(), chainhash);
                         }
                         else
                         {
