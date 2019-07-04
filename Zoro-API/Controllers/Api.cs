@@ -67,6 +67,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAppChainBlock(req);
                         break;
                     #endregion
+
                     #region 获取blocks
                     case "getblocks":
                         result = msq.GetBlocks(req);
@@ -87,6 +88,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAppchainBlocksDESCCache(req);
                         break;
                     #endregion
+
                     #region 获取block from hash
                     case "getblockfromhash":
                         result = msq.GetBlockFromHash(req);
@@ -95,6 +97,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAppChainBlockFromHash(req);
                         break;
                     #endregion
+
                     #region 获取blockcount
                     case "getblockcount":
                         var blockcount = Helper.MakeRpcUrl(ZoroHelper.ZoroUrl, "getblockcount", rootChain);
@@ -111,6 +114,7 @@ namespace Zoro_Web_API.Controllers
                         result = appa;
                         break;
                     #endregion
+
                     #region 获取爬虫爬到的blockcount
                     case "getdatablockheight":
                         result = msq.GetDataBlockHeight(req);
@@ -119,6 +123,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAppchainBlockCount(req);
                         break;
                     #endregion
+
                     #region 获取addrcount
                     case "getaddrcount":
                         result = msq.GetAddrCount(req);
@@ -127,6 +132,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAppchainAddrCount(req);
                         break;
                     #endregion
+
                     #region 获取txcount
                     case "gettxcount":
                         result = msq.GetTxCount(req);
@@ -135,6 +141,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAppchainTxCount(req);
                         break;
                     #endregion
+
                     #region 获取rawtransaction
                     case "getrawtransaction":
                         result = msq.GetRawTransaction(req);
@@ -143,6 +150,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAppChainRawTransaction(req);
                         break;
                     #endregion
+
                     #region 获取transaction
                     case "gettransaction":
                         result = msq.GetTransaction(req);
@@ -151,6 +159,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAppChainTransaction(req);
                         break;
                     #endregion
+
                     #region 获取transaction_ex
                     case "gettransactions_ex":
                         result = msq.GetTransactions_EX(req);
@@ -159,6 +168,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAppChainTransactions_EX(req);
                         break;
                     #endregion
+
                     #region 获取rawtransactions
                     case "getrawtransactions":
                         result = msq.GetRawTransactions(req);
@@ -179,6 +189,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAppchainRawTransactionsDESCCache(req);
                         break;
                     #endregion
+
                     #region 获取allnep5asset
                     case "getallnep5asset":
                         result = msq.GetAllNep5Asset(req);
@@ -187,6 +198,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAllNep5AssetByChainHash(req);
                         break;
                     #endregion
+
                     #region 获取hashlist,appchain
                     case "gethashlist":
                         result = msq.GetHashlist(req);
@@ -198,6 +210,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAppchain(req);
                         break;
                     #endregion
+
                     #region 获取nep5asset
                     case "getnep5asset":
                         result = msq.GetNep5Asset(req);
@@ -205,7 +218,11 @@ namespace Zoro_Web_API.Controllers
                     case "getappchainnep5asset":
                         result = msq.GetAppChainNep5Asset(req);
                         break;
+                    case "getaddressasset":
+                        result = msq.GetAddressAsset(req);
+                        break;
                     #endregion
+
                     #region 获取address
                     case "getaddress":
                         result = msq.GetAddress(req);
@@ -214,6 +231,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAppChainAddress(req);
                         break;
                     #endregion
+
                     #region 获取addr
                     case "getaddr":
                         result = msq.GetAddr(req);
@@ -222,6 +240,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAppChainAddr(req);
                         break;
                     #endregion
+
                     #region 获取addrs
                     case "getaddrs":
                         result = msq.GetAddrs(req);
@@ -230,6 +249,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAppChainAddrs(req);
                         break;
                     #endregion
+
                     #region 获取addresstxs
                     case "getaddresstxs":
                         result = msq.GetAddressTxs(req);
@@ -241,6 +261,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAddressNep5Txs(req);
                         break;
                     #endregion
+
                     #region 获取balance
                     case "getbalance":
                         result = await msq.GetBalanceAsync(req);
@@ -249,6 +270,7 @@ namespace Zoro_Web_API.Controllers
                         result = await msq.GetAppChainBalanceAsync(req);
                         break;
                     #endregion
+
                     #region 获取utxo
                     case "getutxo":
                         result = msq.GetUTXO(req);
@@ -257,6 +279,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAppChainUTXO(req);
                         break;
                     #endregion
+
                     #region 获取rankasset
                     case "getrankbyasset":
                         result = msq.GetRankByAsset(req);
@@ -265,6 +288,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAppChainRankByAsset(req);
                         break;
                     #endregion
+
                     #region 获取rankbyassetcount
                     case "getrankbyassetcount":
                         result = msq.GetRankByAssetCount(req);
@@ -273,6 +297,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAppChainRankByAssetCount(req);
                         break;
                     #endregion
+
                     #region 获取nep5transferbytxid
                     case "getnep5transferbytxid":
                         result = msq.GetNep5TransferByTxid(req);
@@ -281,6 +306,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAppChainNep5TransferByTxid(req);
                         break;
                     #endregion
+
                     #region 获取nep5transferbytxidex
                     case "getnep5transferbytxidex":
                         result = msq.GetNep5TransferByTxidEX(req);
@@ -289,6 +315,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAppChainNep5TransferByTxidEX(req);
                         break;
                     #endregion
+
                     #region 获取nep5transferbytxids
                     case "getnep5transferbytxids":
                         result = msq.GetNep5TransferByTxids(req);
@@ -297,6 +324,7 @@ namespace Zoro_Web_API.Controllers
                         result = msq.GetAppChainNep5TransferByTxids(req);
                         break;
                     #endregion
+
                     #region 获取nep5transfer
                     case "getnep5transfer":
                         result = msq.GetNep5Transfer(req);
@@ -304,71 +332,7 @@ namespace Zoro_Web_API.Controllers
                     case "getappchainnep5transfer":
                         result = msq.GetAppChainNep5Transfer(req);
                         break;
-                    #endregion
-                    case "getpagemessage":
-                        result = msq.getPageMessage(req.@params[0].ToString(), req.@params[1].ToString());
-                        break;
-                    case "getnep5count":
-                        result = msq.GetNep5Count(req);
-                        break;
-                    case "getnep5allnep5assetofaddress":
-                        result = msq.GetAllNep5AssetOfAddress(req);
-                        break;
-                    case "getcontractmessage":
-                        string contractChainHash = "";
-                        string contract = "";
-                        if (req.@params.Length > 1)
-                        {
-                            if (req.@params[0].ToString() == "")
-                            {
-                                contractChainHash = rootChain;
-                            }
-                            else
-                            {
-                                contractChainHash = req.@params[0].ToString();
-                            }
-                            contract = req.@params[1].ToString();
-                            if (!contract.StartsWith("0x"))
-                            {
-                                contract = "0x" + contract;
-                            }
-                            result = msq.GetContractMessage(contractChainHash, contract);
-                        }
-                        else
-                        {
-                            contract = req.@params[0].ToString();
-                            if (!contract.StartsWith("0x"))
-                            {
-                                contract = "0x" + contract;
-                            }
-                            result = msq.GetContractMessage(rootChain, contract);
-                        }
-                        break;
-
-                    #region 获取一个地址下的所有 nft token
-                    //case "getnftfromaddr":
-                    //    string nftChainHash = "";
-                    //    string nftaddr = "";
-                    //    if (req.@params.Length > 1)
-                    //    {
-                    //        if (req.@params[0].ToString() == "")
-                    //        {
-                    //            nftChainHash = rootChain;
-                    //        }
-                    //        else
-                    //        {
-                    //            nftChainHash = req.@params[0].ToString();
-                    //        }
-                    //        nftaddr = req.@params[1].ToString();
-                    //        result = msq.GetNFTFromAddr(nftChainHash, nftaddr);
-                    //    }
-                    //    else
-                    //    {
-                    //        nftaddr = req.@params[0].ToString();
-                    //        result = msq.GetNFTFromAddr(rootChain, nftaddr);
-                    //    }
-                    //    break;
-                    #endregion
+                    #endregion                                      
 
                     #region 获取 nft 相关信息
                     case "getnftfromaddrandhash":
@@ -385,95 +349,7 @@ namespace Zoro_Web_API.Controllers
                         break;
                     #endregion
 
-                    case "getcontractstatemessage":
-                        string stateChainHash = "";
-                        string state = "";
-                        if (req.@params.Length > 1)
-                        {
-                            if (req.@params[0].ToString() == "")
-                            {
-                                stateChainHash = rootChain;
-                            }
-                            else
-                            {
-                                stateChainHash = req.@params[0].ToString();
-                            }
-                            state = req.@params[1].ToString();
-                            if (!state.StartsWith("0x"))
-                            {
-                                state = "0x" + state;
-                            }
-                            result = msq.GetContractState(stateChainHash, state);
-                        }
-                        else
-                        {
-                            state = req.@params[0].ToString();
-                            if (!state.StartsWith("0x"))
-                            {
-                                state = "0x" + state;
-                            }
-                            result = msq.GetContractState(rootChain, state);
-                        }
-                        break;
-                    case "getblockinterval":
-                        string blockChainHash = "";
-                        string length = "";
-                        if (req.@params.Length > 1)
-                        {
-                            if (req.@params[0].ToString() == "")
-                            {
-                                blockChainHash = rootChain;
-                            }
-                            else
-                            {
-                                blockChainHash = req.@params[0].ToString();
-                            }
-                            length = req.@params[1].ToString();
-                            result = msq.GetBlock2Time(blockChainHash, int.Parse(length));
-                        }
-                        else
-                        {
-                            length = req.@params[0].ToString();
-                            result = msq.GetBlock2Time(rootChain, int.Parse(length));
-                        }
-                        break;
-                    case "getblockintervalnext":
-                        string blockChainHashNext = "";
-                        if (req.@params.Length > 1)
-                        {
-                            if (req.@params[0].ToString() == "")
-                            {
-                                blockChainHashNext = rootChain;
-                            }
-                            else
-                            {
-                                blockChainHashNext = req.@params[0].ToString();
-                            }
-                            result = msq.GetBlock2TimeNext(blockChainHashNext);
-                        }
-                        else
-                        {
-                            result = msq.GetBlock2TimeNext(rootChain);
-                        }
-                        break;
-                    case "getscriptmethod":                        
-                        if (req.@params.Length > 1)
-                        {
-                            if (req.@params[0].ToString() == "")
-                            {
-                                chainhash = rootChain;
-                            }
-                            else
-                            {
-                                chainhash = req.@params[0].ToString();
-                            }
-                            result = msq.GetScriptMethodAsync(chainhash, req.@params[1].ToString());
-                        }
-                        else
-                        {
-                            result = msq.GetScriptMethodAsync(rootChain, req.@params[0].ToString());
-                        }
-                        break;
+                    #region 和链交互
                     case "sendrawtransaction":
                         var tx = "";
                         if (req.@params.Length > 1)
@@ -549,6 +425,49 @@ namespace Zoro_Web_API.Controllers
                         }
                         result = new JArray() { JObject.Parse(url)["result"] };
                         break;
+                    #endregion
+
+                    #region 其他
+                    case "getpagemessage":
+                        result = msq.getPageMessage(req.@params[0].ToString(), req.@params[1].ToString());
+                        break;
+                    case "getnep5count":
+                        result = msq.GetNep5Count(req);
+                        break;
+                    case "getnep5allnep5assetofaddress":
+                        result = msq.GetAllNep5AssetOfAddress(req);
+                        break;
+                    case "getcontractmessage":
+                        string contractChainHash = "";
+                        string contract = "";
+                        if (req.@params.Length > 1)
+                        {
+                            if (req.@params[0].ToString() == "")
+                            {
+                                contractChainHash = rootChain;
+                            }
+                            else
+                            {
+                                contractChainHash = req.@params[0].ToString();
+                            }
+                            contract = req.@params[1].ToString();
+                            if (!contract.StartsWith("0x"))
+                            {
+                                contract = "0x" + contract;
+                            }
+                            result = msq.GetContractMessage(contractChainHash, contract);
+                        }
+                        else
+                        {
+                            contract = req.@params[0].ToString();
+                            if (!contract.StartsWith("0x"))
+                            {
+                                contract = "0x" + contract;
+                            }
+                            result = msq.GetContractMessage(rootChain, contract);
+                        }
+                        break;
+
                     case "getallnep5assetofaddress":
                         string NEP5addr = (string)req.@params[0];
                         bool isNeedBalance = false;
@@ -583,109 +502,7 @@ namespace Zoro_Web_API.Controllers
                                 }
                             }
                         }
-
-
-                        ////按资产汇集收到的钱(仅资产ID)
-                        //JArray transferToJA = msq.GetNep5TranferFromToAddress(chainHash, NEP5addr);
-                        //List<NEP5.Transfer> tfts = new List<NEP5.Transfer>();
-                        //foreach (JObject tfJ in transferToJA)
-                        //{
-                        //    tfts.Add(new NEP5.Transfer(tfJ));
-                        //}
-                        //var queryTo = from tft in tfts
-                        //            group tft by tft.asset into tftG
-                        //            select new { assetid = tftG.Key};
-                        //var assetAdds = queryTo.ToList();
-
-                        ////如果需要余额，则通过cli RPC批量获取余额
-                        ////List<NEP5.AssetBalanceOfAddr> addrAssetBalances = new List<NEP5.AssetBalanceOfAddr>();
-                        //if (isNeedBalance) {
-                        //    List<NEP5.AssetBalanceOfAddr> addrAssetBalancesTemp = new List<NEP5.AssetBalanceOfAddr>();
-                        //    foreach (var assetAdd in assetAdds)
-                        //    {
-                        //        string findNep5Asset = "{assetid:'" + assetAdd.assetid + "'}";
-                        //        JArray Nep5AssetJA = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5asset", findNep5Asset);
-                        //        string Symbol = (string)Nep5AssetJA[0]["symbol"];
-                        //        string resp = hh.Post(neoCliJsonRPCUrl, "{'jsonrpc':'2.0','method':'getcontractstate','params':['" + assetAdd.assetid + "'],'id':1}", System.Text.Encoding.UTF8, 1);
-                        //        JObject resultJ = (JObject)JObject.Parse(resp)["result"];
-                        //        if (resultJ == null)
-                        //            continue;
-
-                        //        addrAssetBalancesTemp.Add(new NEP5.AssetBalanceOfAddr(assetAdd.assetid, Symbol, string.Empty));
-                        //    }
-
-                        //    List<string> nep5Hashs = new List<string>();
-                        //    JArray queryParams = new JArray();
-                        //    byte[] NEP5allAssetOfAddrHash = ThinNeo.Helper.GetPublicKeyHashFromAddress(NEP5addr);
-                        //    string NEP5allAssetOfAddrHashHex = ThinNeo.Helper.Bytes2HexString(NEP5allAssetOfAddrHash.Reverse().ToArray());
-                        //    foreach (var abt in addrAssetBalancesTemp)
-                        //    {
-                        //        nep5Hashs.Add(abt.assetid);
-                        //        queryParams.Add(JArray.Parse("['(str)balanceOf',['(hex)" + NEP5allAssetOfAddrHashHex + "']]"));                               
-                        //    }
-                        //    JArray NEP5allAssetBalanceJA = (JArray)ct.callContractForTest(neoCliJsonRPCUrl, nep5Hashs, queryParams)["stack"];
-                        //    var a = Newtonsoft.Json.JsonConvert.SerializeObject(NEP5allAssetBalanceJA);
-                        //    foreach (var abt in addrAssetBalancesTemp)
-                        //    {
-                        //        /// ChangeLog:
-                        //        /// 升级智能合约带来的数据结构不一致问题，暂时使用try方式临时解决
-                        //        try
-                        //        {
-                        //            string allBalanceStr = (string)NEP5allAssetBalanceJA[addrAssetBalancesTemp.IndexOf(abt)]["value"];
-                        //            string allBalanceType = (string)NEP5allAssetBalanceJA[addrAssetBalancesTemp.IndexOf(abt)]["type"];
-
-                        //            //获取NEP5资产信息，获取精度
-                        //            NEP5.Asset NEP5asset = new NEP5.Asset(mongodbConnStr, mongodbDatabase, abt.assetid);
-
-                        //            abt.balance = NEP5.getNumStrFromStr(allBalanceType, allBalanceStr, NEP5asset.decimals);
-                        //        } catch (Exception e)
-                        //        {
-                        //            Console.WriteLine(abt.assetid +",ConvertTypeFailed,errMsg:"+e.Message);
-                        //            abt.balance = string.Empty;
-                        //        }
-                        //    }
-
-                        //    //去除余额为0的资产
-                        //    foreach (var abt in addrAssetBalancesTemp)
-                        //    {
-                        //        if (abt.balance != string.Empty && abt.balance != "0")
-                        //        {
-                        //            addrAssetBalances.Add(abt);
-                        //        }
-                        //    }
-                        //}
-
-                        ////按资产汇集支出的钱
-                        //string findTransferFrom = "{ from:'" + NEP5addr + "'}";
-                        //JArray transferFromJA = mh.GetData(mongodbConnStr, mongodbDatabase, "NEP5transfer", findTransferFrom);
-                        //List<NEP5.Transfer> tffs = new List<NEP5.Transfer>();
-                        //foreach (JObject tfJ in transferFromJA)
-                        //{
-                        //    tffs.Add(new NEP5.Transfer(tfJ));
-                        //}
-                        //var queryFrom = from tff in tffs
-                        //                group tff by tff.asset into tffG
-                        //            select new { assetid = tffG.Key, sumOfValue = tffG.Sum(m => m.value) };
-                        //var assetRemoves = queryFrom.ToList();
-
-                        ////以支出的钱扣减收到的钱得到余额
-                        //JArray JAadds = JArray.FromObject(assetAdds);
-                        //foreach (JObject Jadd in JAadds) {
-                        //    foreach (var assetRemove in assetRemoves)
-                        //    {
-                        //        if ((string)Jadd["assetid"] == assetRemove.assetid)
-                        //        {
-                        //            Jadd["sumOfValue"] = (decimal)Jadd["sumOfValue"] - assetRemove.sumOfValue;
-                        //            break;
-                        //        }
-                        //    }
-                        //}
-                        //var a = Newtonsoft.Json.JsonConvert.SerializeObject(JAadds);
-
-                        //***********
-                        //经简单测试，仅看transfer记录，所有to减去所有from并不一定等于合约查询得到的地址余额(可能有其他非标方法消耗了余额，尤其是测试网)，废弃这种方法，还是采用调用NEP5合约获取地址余额方法的方式
-                        //这里给出所有该地址收到过的资产hash，可以配合其他接口获取资产信息和余额
-                        //***********
+                      
                         if (!isNeedBalance)
                         {
                             result = JArray.FromObject(assetAdds);
@@ -696,6 +513,7 @@ namespace Zoro_Web_API.Controllers
                         }
 
                         break;
+                        #endregion
                 }
                 if (result != null && result.Count > 0 && result[0]["errorCode"] != null)
                 {

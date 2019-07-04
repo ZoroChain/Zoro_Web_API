@@ -264,6 +264,35 @@ namespace Zoro_Web_API.lib
             }
         }
 
+        public JArray GetAddressAsset(JsonRPCrequest req)
+        {
+            var chainHash = req.@params[0].ToString();
+            if (string.IsNullOrEmpty(chainHash) || chainHash == " ") chainHash = rootChain;
+
+            JArray jArray = new JArray();
+           
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();
+
+                string select = "select asset, type from address_asset_" + chainHash + " where addr='" + req.@params[1] + "'";
+
+                JsonPRCresponse res = new JsonPRCresponse();
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+                JArray bk = new JArray();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                while (rdr.Read())
+                {
+                    var asset = (rdr["asset"]).ToString();
+                    var type = rdr["type"].ToString();
+
+                    bk.Add(new JObject { { "asset", asset }, { "type", type } });
+                }               
+                return res.result = bk;
+            }
+        }
+
         public JArray GetAddressTxs(JsonRPCrequest req)
         {
             using (MySqlConnection conn = new MySqlConnection(conf))
@@ -370,9 +399,7 @@ namespace Zoro_Web_API.lib
                 }
 
             }
-        }
-
-
+        }        
 
         public JArray GetAppchainTxCount(JsonRPCrequest req)
         {
@@ -650,7 +677,8 @@ namespace Zoro_Web_API.lib
                         jObject = await InvokeHelper.getBalanceOfAsync(chainHash, asset, req.@params[1].ToString());
                     }
 
-                    jObject.Add("asset", asset);
+                    jObject.Add("assetid", asset);
+                    jObject.Add("type", type);
 
                     bk.Add(jObject);
 
