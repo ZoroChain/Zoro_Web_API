@@ -71,6 +71,68 @@ namespace Zoro_Web_API.lib
             return result;
         }
 
+        public static async Task<decimal> getDecimalBalanceOfAsync(string chainHash, string assetid, string address)
+        {
+            using (Neo.VM.ScriptBuilder sb = new ScriptBuilder())
+            {
+                sb.EmitAppCall(ZoroHelper.Parse(assetid), "balanceOf", ZoroHelper.GetPublicKeyHashFromAddress(address));
+                sb.EmitAppCall(ZoroHelper.Parse(assetid), "decimals");
+                sb.EmitAppCall(ZoroHelper.Parse(assetid), "symbol");
+
+                var info = await ZoroHelper.InvokeScript(sb.ToArray(), chainHash);
+                var value = GetDecimalBalanceFromJson(info);
+                return value;
+            }
+        }
+
+        public static async Task<decimal> getNativeDecimalBalanceOfAsync(string chainHash, string assetid, string address)
+        {
+            using (ScriptBuilder sb = new ScriptBuilder())
+            {
+                sb.EmitSysCall("Zoro.NativeNEP5.Call", "BalanceOf", UInt160.Parse(assetid), ZoroHelper.GetPublicKeyHashFromAddress(address));
+                sb.EmitSysCall("Zoro.NativeNEP5.Call", "Decimals", UInt160.Parse(assetid));
+                sb.EmitSysCall("Zoro.NativeNEP5.Call", "Symbol", UInt160.Parse(assetid));
+                var info = await ZoroHelper.InvokeScript(sb.ToArray(), chainHash);
+                var value = GetDecimalBalanceFromJson(info);
+                return value;
+            }
+        }
+
+        static decimal GetDecimalBalanceFromJson(string info)
+        {
+            decimal result = 0;
+            try
+            {
+                JObject json = JObject.Parse(info) as JObject;
+
+                if (json.ContainsKey("result"))
+                {
+                    JObject json_result = json["result"] as JObject;
+                    JArray stack = json_result["stack"] as JArray;
+
+                    if (stack != null && stack.Count >= 2)
+                    {
+                        string balance = GetJsonValue(stack[0] as JObject);
+                        string decimals = GetJsonValue(stack[1] as JObject);
+                        string symbol = GetJsonSymbol(stack[2] as JObject);
+
+                        result = Decimal.Parse(balance) / new Decimal(Math.Pow(10, int.Parse(decimals)));  
+                    }
+                }
+                else if (json.ContainsKey("error"))
+                {
+                    JObject json_error_obj = json["error"] as JObject;
+                    result = 0;
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+            return result;
+        }
+
+
         static string GetJsonValue(JObject item)
         {
             var type = item["type"].ToString();

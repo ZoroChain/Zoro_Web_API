@@ -221,6 +221,9 @@ namespace Zoro_Web_API.Controllers
                     case "getaddressasset":
                         result = msq.GetAddressAsset(req);
                         break;
+                    case "getaddressallasset":
+                        result = await msq.GetAddressAllAssetAsync(req);
+                        break;
                     #endregion
 
                     #region 获取address
@@ -375,6 +378,7 @@ namespace Zoro_Web_API.Controllers
                         else
                             result = new JArray() { JObject.Parse(tx)["result"] };
                         break;
+
                     case "invokescript":
                         var invokescript = "";
                         if (req.@params.Length > 1)

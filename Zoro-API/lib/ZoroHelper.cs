@@ -214,7 +214,7 @@ namespace Zoro_Web_API
             postArray.Add(chainHash);
             postArray.Add(scriptPublish);
 
-            url = Helper.MakeRpcUrlPost(Program.local, "invokescript", out postdata, postArray);
+            url = Helper.MakeRpcUrlPost(Settings.Default.Url, "invokescript", out postdata, postArray);
 
             string result = "";
             try
@@ -287,7 +287,7 @@ namespace Zoro_Web_API
             postRawArray.Add(chainHash);
             postRawArray.Add(rawdata);
 
-            url = Helper.MakeRpcUrlPost(Program.local, method, out postdata, postRawArray);
+            url = Helper.MakeRpcUrlPost(Settings.Default.Url, method, out postdata, postRawArray);
 
             string result = "";
             try

@@ -9,13 +9,11 @@ namespace Zoro_Web_API
 {
     public class Program
     {
-        public static string local = "";
         public static string ChainID = "Zoro";
 
         public static void Main(string[] args)
         {
             mySqlHelper.conf = Settings.Default.MysqlConfig;
-            local = Settings.Default.Url;
             ZoroHelper.ZoroUrl = Settings.Default.Url;
             BuildWebHost(args).Run();
         }

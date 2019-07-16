@@ -293,28 +293,85 @@ namespace Zoro_Web_API.lib
             }
         }
 
-        public JArray GetAddressTxs(JsonRPCrequest req)
+        public async Task<JArray> GetAddressAllAssetAsync(JsonRPCrequest req)
         {
+            var chainHash = req.@params[0].ToString();
+            if (string.IsNullOrEmpty(chainHash) || chainHash == " ") chainHash = rootChain;
+            var address = req.@params[1].ToString();
+            JArray jArray = new JArray();
+
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 conn.Open();
-                var addr = req.@params[0].ToString();
 
-                string select = "select txid,addr,blocktime,blockindex from address_tx_" + rootChain + " where @addr = addr order by blockindex desc limit " + (int.Parse(req.@params[1].ToString()) * int.Parse(req.@params[2].ToString())) + ", " + req.@params[1];
+                string select = "select type, assetid, name, symbol, decimals from address_asset_" + chainHash + " a left join nep5asset_" + chainHash + " n on a.asset = n.assetid where addr='" + address + "'";
 
                 JsonPRCresponse res = new JsonPRCresponse();
                 MySqlCommand cmd = new MySqlCommand(select, conn);
-                cmd.Parameters.AddWithValue("@addr", addr);
+                JArray bk = new JArray();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                while (rdr.Read())
+                {
+                    string type = rdr["type"].ToString();
+                    string assetid = rdr["assetid"].ToString();
+                    int decimals = int.Parse(rdr["decimals"].ToString());
+
+                    decimal banlance = 0;
+                    if (type == "NativeNep5")
+                    {
+                        banlance = await InvokeHelper.getNativeDecimalBalanceOfAsync(chainHash, assetid, address);
+                    }
+                    else
+                    {
+                        banlance = await InvokeHelper.getDecimalBalanceOfAsync(chainHash, assetid, address);
+                    }
+
+                    bk.Add(new JObject {
+                        { "assetid", assetid },
+                        { "type", type },
+                        { "name", rdr["name"].ToString()},
+                        { "symbol", rdr["symbol"].ToString()},
+                        { "decimals", decimals},
+                        { "balance", banlance}
+                    });
+                }
+                return res.result = bk;
+            }
+        }
+
+        public JArray GetAddressTxs(JsonRPCrequest req)
+        {
+            var chainHash = req.@params[0].ToString();
+            if (string.IsNullOrEmpty(chainHash) || chainHash == " ") chainHash = rootChain;
+            var address = req.@params[1].ToString();
+
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();                
+
+                string select = "select nt.txid, nt.fromx, nt.tox, nt.asset, np.symbol, np.decimals, nt.value, nt.blockindex, bl.time from nep5transfer_" + chainHash + " nt left join block_" + chainHash + " bl on nt.blockindex = bl.indexx left join nep5asset_" + chainHash + " np on nt.asset = np.assetid where fromx = @addr or tox = @addr order by blockindex desc limit " + (int.Parse(req.@params[2].ToString()) * int.Parse(req.@params[3].ToString())) + ", " + req.@params[2];
+
+                JsonPRCresponse res = new JsonPRCresponse();
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+                cmd.Parameters.AddWithValue("@addr", address);
 
                 MySqlDataReader rdr = cmd.ExecuteReader();
                 JArray bk = new JArray();
                 while (rdr.Read())
                 {
-                    var adata = (rdr["txid"]).ToString();
-                    var vdata = (rdr["addr"]).ToString();
-                    var bt = (rdr["blocktime"]).ToString();
-                    var bi = (rdr["blockindex"]).ToString();
-                    bk.Add(new JObject { { "addr", vdata }, { "txid", adata }, { "blockindex", bi }, { "blocktime", bt } });
+                    bk.Add(new JObject {
+                        { "addr", address },
+                        { "from", rdr["fromx"].ToString() },
+                        { "to", rdr["tox"].ToString() },
+                        { "assetid", rdr["asset"].ToString() },
+                        { "assetname", rdr["symbol"].ToString() },
+                        { "value", rdr["value"].ToString() },
+                        { "decimals", rdr["decimals"].ToString()},
+                        { "txid", rdr["txid"].ToString() },
+                        { "blockindex", rdr["blockindex"].ToString() },
+                        { "blocktime", rdr["time"].ToString() }
+                    });
                 }
                 return res.result = bk;
 

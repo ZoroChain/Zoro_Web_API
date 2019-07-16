@@ -11,10 +11,6 @@ namespace Zoro_Web_API
 {
     static class Helper
     {
-        public static string ZoroNativeNep5Call = "5a6f726f2e4e61746976654e4550352e43616c6c";
-        public static string Nep5Call = "5a6f726f2e4e61746976654e4550352e43616c6c";
-        public static string ZoroGlobalAssetTransfer = "5a6f726f2e476c6f62616c41737365742e5472616e73666572";
-
         public static string Bytes2HexString(byte[] data)
         {
             StringBuilder sb = new StringBuilder();
