@@ -340,6 +340,104 @@ namespace Zoro_Web_API.lib
             }
         }
 
+        internal JArray GetNep5TransferByAsset(JsonRPCrequest req)
+        {
+            var chainHash = req.@params[0].ToString();
+            if (string.IsNullOrEmpty(chainHash) || chainHash == " ") chainHash = rootChain;
+            var assetid = req.@params[1].ToString();
+
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();
+
+                string select = "select nt.txid, nt.fromx, nt.tox, nt.asset, nt.value, nt.blockindex from nep5transfer_" + chainHash + " nt where asset = @asset order by blockindex desc limit " + (int.Parse(req.@params[2].ToString()) * int.Parse(req.@params[3].ToString())) + ", " + req.@params[2];
+
+                JsonPRCresponse res = new JsonPRCresponse();
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+                cmd.Parameters.AddWithValue("@asset", assetid);
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                JArray bk = new JArray();
+                while (rdr.Read())
+                {
+                    bk.Add(new JObject {
+                        { "assetid", assetid },
+                        { "from", rdr["fromx"].ToString() },
+                        { "to", rdr["tox"].ToString() },                        
+                        { "value", rdr["value"].ToString() },                        
+                        { "txid", rdr["txid"].ToString() },
+                        { "blockindex", rdr["blockindex"].ToString() },                        
+                    });
+                }
+                return res.result = bk;
+
+            }
+        }
+
+        internal JArray GetSendAllAmountByAddress(JsonRPCrequest req)
+        {
+            var chainHash = req.@params[0].ToString();
+            if (string.IsNullOrEmpty(chainHash) || chainHash == " ") chainHash = rootChain;
+            var assetid = req.@params[1].ToString();
+            var address = req.@params[2].ToString();
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();
+
+                string select = "select sum(nt.value) as value from nep5transfer_" + chainHash + " nt where asset = @asset and fromx = @address group by asset";
+
+                JsonPRCresponse res = new JsonPRCresponse();
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+                cmd.Parameters.AddWithValue("@asset", assetid);
+                cmd.Parameters.AddWithValue("@address", address);
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                JArray bk = new JArray();
+                while (rdr.Read())
+                {
+                    bk.Add(new JObject {
+                        { "assetid", assetid },                        
+                        { "amount", rdr["value"].ToString() },                        
+                    });
+                }
+                return res.result = bk;
+
+            }
+        }
+
+        internal JArray GetNep5TransferByAssetAndAddress(JsonRPCrequest req)
+        {
+            var chainHash = req.@params[0].ToString();
+            if (string.IsNullOrEmpty(chainHash) || chainHash == " ") chainHash = rootChain;
+            var assetid = req.@params[1].ToString();
+            var address = req.@params[2].ToString();
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();
+
+                string select = "select nt.txid, nt.fromx, nt.tox, nt.asset, nt.value, nt.blockindex from nep5transfer_" + chainHash + " nt where asset = @asset and (fromx = @address or tox = @address) order by blockindex desc";
+
+                JsonPRCresponse res = new JsonPRCresponse();
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+                cmd.Parameters.AddWithValue("@asset", assetid);
+                cmd.Parameters.AddWithValue("@address", address);
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                JArray bk = new JArray();
+                while (rdr.Read())
+                {
+                    bk.Add(new JObject {
+                        { "assetid", assetid },
+                        { "from", rdr["fromx"].ToString() },
+                        { "to", rdr["tox"].ToString() },
+                        { "value", rdr["value"].ToString() },
+                        { "txid", rdr["txid"].ToString() },
+                        { "blockindex", rdr["blockindex"].ToString() },
+                    });
+                }
+                return res.result = bk;
+
+            }
+        }
+
         public JArray GetAddressTxs(JsonRPCrequest req)
         {
             var chainHash = req.@params[0].ToString();
@@ -350,11 +448,11 @@ namespace Zoro_Web_API.lib
             {
                 conn.Open();                
 
-                string select = "select nt.txid, nt.fromx, nt.tox, nt.asset, np.symbol, np.decimals, nt.value, nt.blockindex, bl.time from nep5transfer_" + chainHash + " nt left join block_" + chainHash + " bl on nt.blockindex = bl.indexx left join nep5asset_" + chainHash + " np on nt.asset = np.assetid where fromx = @addr or tox = @addr order by blockindex desc limit " + (int.Parse(req.@params[2].ToString()) * int.Parse(req.@params[3].ToString())) + ", " + req.@params[2];
+                string select = "select nt.txid, nt.fromx, nt.tox, nt.asset, np.symbol, np.decimals, nt.value, nt.blockindex, bl.time from nep5transfer_" + chainHash + " nt left join block_" + chainHash + " bl on nt.blockindex = bl.indexx left join nep5asset_" + chainHash + " np on nt.asset = np.assetid where fromx = @address or tox = @address order by blockindex desc limit " + (int.Parse(req.@params[2].ToString()) * int.Parse(req.@params[3].ToString())) + ", " + req.@params[2];
 
                 JsonPRCresponse res = new JsonPRCresponse();
                 MySqlCommand cmd = new MySqlCommand(select, conn);
-                cmd.Parameters.AddWithValue("@addr", address);
+                cmd.Parameters.AddWithValue("@address", address);
 
                 MySqlDataReader rdr = cmd.ExecuteReader();
                 JArray bk = new JArray();
@@ -1371,36 +1469,6 @@ namespace Zoro_Web_API.lib
                     bk.Add(new JObject { { "id", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata } });
                 }
                 return res.result;
-            }
-        }
-
-        public JArray GetScriptMethodAsync(string chainhash, string txid)
-        {
-            using (MySqlConnection conn = new MySqlConnection(conf))
-            {
-                conn.Open();
-                string select = "select tx.calltype, tx.method, tx.contract,cs.supportstandard supportstandard from tx_script_method_" + chainhash + " tx left join contract_state_" + chainhash + " cs on tx.contract = cs.hash where txid = '" + txid + "'";
-
-                MySqlCommand cmd = new MySqlCommand(select, conn);
-
-                JsonPRCresponse res = new JsonPRCresponse();
-
-                MySqlDataReader rdr = cmd.ExecuteReader();
-                JArray bk = new JArray();
-                while (rdr.Read())
-                {
-                    var calltype = (rdr["calltype"]).ToString();
-                    var method = (rdr["method"]).ToString();
-                    var contract = (rdr["contract"]).ToString();
-                    var supportstandard = (rdr["supportstandard"].ToString());
-
-                    var name = getName(chainhash, contract);
-
-                    bk.Add(new JObject { { "calltype", calltype }, { "method", method }, { "contract", contract }, { "name", name }, { "supportstandard", supportstandard } });
-                }
-
-                return res.result = bk;
-
             }
         }
 

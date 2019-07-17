@@ -335,6 +335,16 @@ namespace Zoro_Web_API.Controllers
                     case "getappchainnep5transfer":
                         result = msq.GetAppChainNep5Transfer(req);
                         break;
+                    case "getnep5transferbyasset":
+                        result = msq.GetNep5TransferByAsset(req);
+                        break;
+                    case "getnep5transferbyassetandaddress":
+                        result = msq.GetNep5TransferByAssetAndAddress(req);
+                        break;
+                    case "getsendallamountbyaddress":
+                        result = msq.GetSendAllAmountByAddress(req);
+                        break;
+
                     #endregion                                      
 
                     #region 获取 nft 相关信息
