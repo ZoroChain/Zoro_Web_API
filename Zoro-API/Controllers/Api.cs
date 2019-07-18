@@ -267,7 +267,10 @@ namespace Zoro_Web_API.Controllers
 
                     #region 获取balance
                     case "getbalance":
-                        result = await msq.GetBalanceAsync(req);
+                        result = await msq.GetBalanceByAssetAsync(req);
+                        break;
+                    case "getbalancebyasset":
+                        result = await msq.GetAssetBalanceAsync(req);
                         break;
                     case "getappchainbalance":
                         result = await msq.GetAppChainBalanceAsync(req);

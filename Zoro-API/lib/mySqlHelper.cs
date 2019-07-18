@@ -758,7 +758,8 @@ namespace Zoro_Web_API.lib
 
             }
         }
-        public async Task<JArray> GetBalanceAsync(JsonRPCrequest req) // needs to be changed for the right balance data
+
+        public async Task<JArray> GetBalanceByAssetAsync(JsonRPCrequest req) // needs to be changed for the right balance data
         {
             JArray jArray = new JArray();
             if (jArrays.TryGetValue("balance" + req.@params[0], out jArray))
@@ -793,6 +794,51 @@ namespace Zoro_Web_API.lib
 
                 }
                 jArrays.AddOrUpdate("balance" + req.@params[0], bk, (s, a) => { return a; });
+                return res.result = bk;
+            }
+        }
+
+        internal async Task<JArray> GetAssetBalanceAsync(JsonRPCrequest req)
+        {
+            var chainHash = req.@params[0].ToString();
+            if (string.IsNullOrEmpty(chainHash) || chainHash == " ") chainHash = rootChain;
+
+            JArray jArray = new JArray();
+            string address = req.@params[1].ToString();
+            string assetid = req.@params[2].ToString();
+
+            using (MySqlConnection conn = new MySqlConnection(conf))
+            {
+                conn.Open();
+
+                string select = "select type from address_asset_" + chainHash + " where addr ='" + address + "' and asset = '" + assetid + "'";
+
+                JsonPRCresponse res = new JsonPRCresponse();
+                MySqlCommand cmd = new MySqlCommand(select, conn);
+                JArray bk = new JArray();
+
+                MySqlDataReader rdr = cmd.ExecuteReader();
+                while (rdr.Read())
+                {                    
+                    var type = rdr["type"].ToString();
+                    var jObject = new JObject();
+                    if (type == "NativeNep5")
+                    {
+                        jObject = await InvokeHelper.getNativeBalanceOfAsync(chainHash, assetid, address);
+                    }
+                    else
+                    {
+                        jObject = await InvokeHelper.getBalanceOfAsync(chainHash, assetid, address);
+                    }
+
+                    jObject.Add("assetid", assetid);
+                    jObject.Add("type", type);
+
+                    bk.Add(jObject);
+
+                }
+
+                jArrays.AddOrUpdate("appchainbalance" + chainHash + req.@params[1], bk, (s, a) => { return a; });
                 return res.result = bk;
             }
         }
@@ -953,6 +999,7 @@ namespace Zoro_Web_API.lib
 
             }
         }
+
         public JArray GetHashlist(JsonRPCrequest req)
         {
             JArray jArray = new JArray();
@@ -1055,7 +1102,6 @@ namespace Zoro_Web_API.lib
                 return res.result = bk;
             }
         }
-
 
         public JArray GetBlocks(JsonRPCrequest req)
         {
@@ -1220,8 +1266,7 @@ namespace Zoro_Web_API.lib
                 return res.result = bk;
             }
         }
-
-
+        
         public JArray GetAppchainBlocksDESCCache(JsonRPCrequest req)
         {
             JArray jArray = new JArray();
@@ -2362,7 +2407,6 @@ namespace Zoro_Web_API.lib
 
         }
 
-
         public JArray GetAppchainRawTransactionsDESC(JsonRPCrequest req)  // needs a sorting by txtype miner , reg or issue
         {
             using (MySqlConnection conn = new MySqlConnection(conf))
@@ -2440,7 +2484,6 @@ namespace Zoro_Web_API.lib
             }
 
         }
-
 
         public JArray GetAppchainRawTransactionsDESCCache(JsonRPCrequest req)  // needs a sorting by txtype miner , reg or issue
         {
@@ -2655,8 +2698,7 @@ namespace Zoro_Web_API.lib
                 }
             }
         }
-
-
+        
         public JArray GetDataBlockHeight(JsonRPCrequest req)   // gets the last 1 in desc
         {
             using (MySqlConnection conn = new MySqlConnection(conf))
@@ -2677,8 +2719,7 @@ namespace Zoro_Web_API.lib
                 return res.result;
             }
         }
-
-
+        
         public JArray GetAppchainBlockCount(JsonRPCrequest req)
         {
             using (MySqlConnection conn = new MySqlConnection(conf))
@@ -3126,34 +3167,6 @@ namespace Zoro_Web_API.lib
                 }
                 return res.result = bk;
             }
-        }
-
-        private string getName(string chainHash, string contract)
-        {
-            string name = "";
-            JsonPRCresponse res = new JsonPRCresponse();
-            using (MySqlConnection conn = new MySqlConnection(conf))
-            {
-                conn.Open();
-
-                if (!contract.StartsWith("0x"))
-                {
-                    contract = "0x" + contract;
-                }
-
-                string select = "select name from contract_state_" + chainHash + " where hash='" + contract + "'";
-
-                MySqlCommand cmd = new MySqlCommand(select, conn);
-
-                MySqlDataReader rdr = cmd.ExecuteReader();
-
-                JArray bk = new JArray();
-                while (rdr.Read())
-                {
-                    name = (rdr["name"]).ToString();
-                }
-            }
-            return name;
         }
 
         public JArray getPageMessage(string chainhash, string id)
