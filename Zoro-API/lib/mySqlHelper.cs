@@ -394,9 +394,10 @@ namespace Zoro_Web_API.lib
                 JArray bk = new JArray();
                 while (rdr.Read())
                 {
+                    Decimal amount = Decimal.Parse(rdr["value"].ToString()) / new Decimal(Math.Pow(10, 8));
                     bk.Add(new JObject {
                         { "assetid", assetid },                        
-                        { "amount", rdr["value"].ToString() },                        
+                        { "amount", amount },                        
                     });
                 }
                 return res.result = bk;
@@ -836,9 +837,7 @@ namespace Zoro_Web_API.lib
 
                     bk.Add(jObject);
 
-                }
-
-                jArrays.AddOrUpdate("appchainbalance" + chainHash + req.@params[1], bk, (s, a) => { return a; });
+                }                                
                 return res.result = bk;
             }
         }

@@ -40,6 +40,8 @@ namespace Zoro_Web_API.Controllers
 
                 string ipAddr = Request.HttpContext.Connection.RemoteIpAddress.ToString();
 
+                //Console.WriteLine("main:" + Request.Headers.ToString());
+
                 var json = await api.getResAsync(req, ipAddr);
                 var result = Json(json);
                 if (DateTime.Now.Subtract(start).TotalSeconds > logExeTimeMax)
