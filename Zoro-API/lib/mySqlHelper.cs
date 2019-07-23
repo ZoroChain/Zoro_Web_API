@@ -1878,32 +1878,24 @@ namespace Zoro_Web_API.lib
                     vdata = num.ToString();
 
                     bk.Add(new JObject { { "blockindex", blockindex }, { "txid", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata }, { "symbol", symbol } });
-                }
-
-                //JArray notify = GetNotifys(req.@params, rootChain, 0);
-                //int j = 0;
-                //for (int i = 0; i < notify.Count; i++)
-                //{
-                //    if (bk.Count == 0 || bk.Count < i - j + 1 || notify[i]["txid"].ToString() != bk[i - j]["txid"].ToString())
-                //    {
-                //        j++;
-                //        bk.Add(new JObject { { "blockindex", notify[i]["blockindex"].ToString() }, { "txid", notify[i]["txid"].ToString() }, { "asset", "" }, { "from", "" }, { "to", "" }, { "value", "" }, { "symbol", "" } });
-                //    }
-                //}
+                }                                
 
                 return res.result = bk;
 
             }
         }
 
-        public JArray GetAppChainNep5TransferByTxids(JsonRPCrequest req)
+        public JArray GetTransferByTxids(JsonRPCrequest req)
         {
+            var chainHash = req.@params[0].ToString();
+            if (string.IsNullOrEmpty(chainHash) || chainHash == " ") chainHash = rootChain;
+
             using (MySqlConnection conn = new MySqlConnection(conf))
             {
                 conn.Open();
 
                 string select = "select a.blockindex as blockindex, a.txid as txid, a.asset as asset, a.fromx as fromx, a.tox as tox, a.value as value, b.decimals as decimals, b.symbol as symbol from ";
-                select += "(select blockindex, txid, asset, fromx, tox, value from nep5transfer_" + req.@params[0] + " where txid in (";
+                select += "(select blockindex, txid, asset, fromx, tox, value from nep5transfer_" + chainHash + " where txid in (";
                 int length = req.@params.Length;
                 for (int i = 1; i < length; i++)
                 {
@@ -1917,7 +1909,7 @@ namespace Zoro_Web_API.lib
                     else
                         select += "'" + txid + "',";
                 }
-                select += ") as a, nep5asset_" + req.@params[0] + " as b where a.asset=b.assetid order by blockindex ASC";
+                select += ") as a, nep5asset_" + chainHash + " as b where a.asset=b.assetid order by blockindex ASC";
 
                 MySqlCommand cmd = new MySqlCommand(select, conn);
 
@@ -1939,18 +1931,7 @@ namespace Zoro_Web_API.lib
                     vdata = num.ToString();
 
                     bk.Add(new JObject { { "blockindex", blockindex }, { "txid", idata }, { "asset", adata }, { "from", fdata }, { "to", tdata }, { "value", vdata }, { "symbol", symbol } });
-                }
-
-                JArray notify = GetNotifys(req.@params, req.@params[0].ToString(), 1);
-                int j = 0;
-                for (int i = 0; i < notify.Count; i++)
-                {
-                    if (bk.Count == 0 || notify[i]["txid"].ToString() != bk[i - j]["txid"].ToString())
-                    {
-                        j++;
-                        bk.Add(new JObject { { "blockindex", notify[i]["blockindex"].ToString() }, { "txid", notify[i]["txid"].ToString() }, { "asset", "" }, { "from", "" }, { "to", "" }, { "value", "" }, { "symbol", "" } });
-                    }
-                }
+                }              
 
                 return res.result = bk;
 

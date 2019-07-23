@@ -326,8 +326,8 @@ namespace Zoro_Web_API.Controllers
                     case "getnep5transferbytxids":
                         result = msq.GetNep5TransferByTxids(req);
                         break;
-                    case "getappchainnep5transferbytxids":
-                        result = msq.GetAppChainNep5TransferByTxids(req);
+                    case "gettransferbytxids":
+                        result = msq.GetTransferByTxids(req);
                         break;
                     #endregion
 
